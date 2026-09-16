@@ -322,7 +322,6 @@
         <h4>FROM THE BOOK</h4>
         <div class="acc-item book"><input type="checkbox" data-day="lower" data-name="Direct Abdominal Work" data-sets="2 x 10-12" checked><div>Direct Abdominal Work<div class="meta">2 sets of 10-12 reps</div></div></div>
         <div class="acc-item book"><input type="checkbox" data-day="lower" data-name="Direct Calf Work" data-sets="1 x 15-20 (slow)" checked><div>Direct Calf Work<div class="meta">1 set, 15-20 slow reps</div></div></div>
-        <div class="acc-item book"><input type="checkbox" data-day="lower" data-name="Olympic Lift Variant" data-sets="5-6 singles"><div>Olympic Lift Variant (clean/snatch pulls etc.)<div class="meta">5-6 singles per session</div></div></div>
       </div>
       <div class="accessory-group">
         <h4>NOT IN THE ORIGINAL TEXT — COMMON ADDITIONS</h4>
@@ -342,7 +341,6 @@
         <div class="acc-item book"><input type="checkbox" data-day="upper" data-name="Weighted Chin/Pull-up Variant" data-sets="2 x 6-8 (if weighted)"><div>Weighted Chin/Pull-up Variant<div class="meta">2 sets of 6-8 reps — an extra weighted variant on top of Section 2's daily chins</div></div></div>
         <div class="acc-item book"><input type="checkbox" data-day="upper" data-name="Forearm Work" data-sets="2 x 12-20"><div>Forearm Work<div class="meta">2 sets of 12-20 reps</div></div></div>
         <div class="acc-item book"><input type="checkbox" data-day="upper" data-name="Cable Arm Movement" data-sets="2-3 x 10-12" checked><div>Cable Arm Movement (triceps/delts)<div class="meta">10-12 rep range</div></div></div>
-        <div class="acc-item book"><input type="checkbox" data-day="upper" data-name="Olympic Lift Variant" data-sets="5-6 singles"><div>Olympic Lift Variant<div class="meta">5-6 singles per session</div></div></div>
       </div>
     </div>
   </div>
@@ -528,6 +526,26 @@ const additionalStrengthNote = document.getElementById('additional-strength-note
 const lowerAddonsHeading = document.getElementById('lower-addons-heading');
 const upperAddonsHeading = document.getElementById('upper-addons-heading');
 
+function updateScheduleNote(mode = getProgramMode()){
+  const squat = document.getElementById('squat-variant').value;
+  const deadlift = document.getElementById('dl-variant').value;
+  const bench = document.getElementById('bench-variant').value;
+  const press = document.getElementById('press-variant').value;
+  const progressionNote = 'Weights are projected assuming you hit every prescribed rep. If you reset on a lift mid-plan, restart that lift from 90% using the reset rule above.';
+
+  if (mode === '3day'){
+    scheduleNote.textContent = '3 sessions/week: ' + press + ' + ' + squat + ', ' + bench + ' + ' + deadlift + ', ' + press + ' + ' + squat + '. ' + progressionNote;
+  } else if (mode === 'phraxture'){
+    scheduleNote.textContent = '3 sessions/week: ' + press + ' + ' + squat + ' + Weighted Pull-ups, ' + bench + ' + ' + deadlift + ' + Barbell Row, then ' + press + ' + ' + squat + ' + Weighted Pull-ups. Back movements use 2x5, 1x5+ with weight added after 5+ reps on the third set.';
+  } else {
+    scheduleNote.textContent = '4 sessions/week: Day 1 Lower (' + squat + '), Day 2 Upper (' + press + ' or ' + bench + '), Day 3 Rest, Day 4 Lower (' + deadlift + '), Day 5 Upper (' + bench + ' or ' + press + '), Day 6 Rest, Day 7 Rest. ' + progressionNote;
+  }
+}
+
+['squat-variant', 'dl-variant', 'bench-variant', 'press-variant'].forEach(id=>{
+  document.getElementById(id).addEventListener('change', ()=>updateScheduleNote());
+});
+
 function updateAdditionalStrengthLabels(mode){
   const isUpperLower = mode === '4day';
   additionalStrengthTitle.textContent = isUpperLower
@@ -545,19 +563,18 @@ document.querySelectorAll('#program-mode button').forEach(btn=>{
     document.querySelectorAll('#program-mode button').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
     updateAdditionalStrengthLabels(btn.dataset.mode);
+    updateScheduleNote(btn.dataset.mode);
     if (btn.dataset.mode === '3day'){
       programNote.textContent = 'The book\'s original template: Press+Squat, Bench+Deadlift, Press+Squat — three sessions a week, with Bench and Press swapping which day they land on every other week so both get equal work.';
-      scheduleNote.textContent = '3 sessions/week: Press+Squat, Bench+Deadlift, Press+Squat — then Bench and Press swap places the following week, exactly as laid out in the book. Weights are projected assuming you hit every prescribed rep — if you reset on a lift mid-plan, cross out the rest of that lift\'s projected numbers and restart from 90% by hand using the rule above.';
     } else if (btn.dataset.mode === 'phraxture'){
       programNote.textContent = 'A 3-day variation: press and squat on the outer days, bench and deadlift in the middle, with weighted pull-ups on the outer days and barbell rows on deadlift day.';
-      scheduleNote.textContent = '3 sessions/week: Press + Squat + Weighted Pull-ups, Bench + Deadlift + Barbell Row, Press + Squat + Weighted Pull-ups. Both back movements use 2x5, 1x5+.';
     } else {
       programNote.textContent = 'A 4-day split adapted to Upper/Lower: Lower, Upper, rest, Lower, Upper, rest, rest. Bench and Press alternate across the two upper days, while Squat and Deadlift occupy the lower days.';
-      scheduleNote.textContent = '4 sessions/week: Day 1 Lower (Squat), Day 2 Upper, Day 3 Rest, Day 4 Lower (Deadlift), Day 5 Upper, Day 6 Rest, Day 7 Rest. Bench/Press swap upper days each week. Weights are projected assuming you hit every prescribed rep — if you reset on a lift mid-plan, cross out the rest of that lift\'s projected numbers and restart from 90% by hand using the rule above.';
     }
   });
 });
 updateAdditionalStrengthLabels(getProgramMode());
+updateScheduleNote();
 
 
 function getMode(groupId){
