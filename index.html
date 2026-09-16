@@ -363,24 +363,32 @@
     <div class="weeks-note" id="daily-method-note" style="margin-top:12px;">
       Multiple easy sets spread throughout the day, never to failure, one full day off per week. Add a set or a rep once the last rep of every set still feels easy.
     </div>
+    <div class="small-field" id="fm-set-control">
+      <label for="fm-sets">Sets per day</label>
+      <select id="fm-sets">
+        <option value="4">4 sets</option>
+        <option value="5">5 sets</option>
+        <option value="6">6 sets</option>
+      </select>
+    </div>
   </div>
 
   <h2 class="section-title">MOVEMENTS</h2>
   <div class="card">
     <div class="acc-item book"><input type="checkbox" data-daily="pullups" checked><div>Chin-ups / Pull-ups<div class="meta">Book's primary daily movement</div></div>
-      <div class="num-field twm-target" style="display:none;"><span>DAILY REPS</span><input type="number" data-daily-target="pullups" value="10" step="2"></div>
+      <div class="num-field daily-reps"><span data-daily-rep-label>REPS / SET × 4</span><input type="number" data-daily-reps="pullups" value="10" min="1" step="1"></div>
     </div>
     <div class="acc-item book"><input type="checkbox" data-daily="pushups" checked><div>Push-ups<div class="meta">Commonly paired with chins in the book's own sample weeks</div></div>
-      <div class="num-field twm-target" style="display:none;"><span>DAILY REPS</span><input type="number" data-daily-target="pushups" value="70" step="5"></div>
+      <div class="num-field daily-reps"><span data-daily-rep-label>REPS / SET × 4</span><input type="number" data-daily-reps="pushups" value="70" min="1" step="1"></div>
     </div>
     <div class="acc-item book"><input type="checkbox" data-daily="dips"><div>Dips<div class="meta">Same three methods apply</div></div>
-      <div class="num-field twm-target" style="display:none;"><span>DAILY REPS</span><input type="number" data-daily-target="dips" value="30" step="5"></div>
+      <div class="num-field daily-reps"><span data-daily-rep-label>REPS / SET × 4</span><input type="number" data-daily-reps="dips" value="30" min="1" step="1"></div>
     </div>
     <div class="acc-item book"><input type="checkbox" data-daily="squats"><div>Bodyweight Squats<div class="meta">Daily squat pattern work</div></div>
-      <div class="num-field twm-target" style="display:none;"><span>DAILY REPS</span><input type="number" data-daily-target="squats" value="30" step="5"></div>
+      <div class="num-field daily-reps"><span data-daily-rep-label>REPS / SET × 4</span><input type="number" data-daily-reps="squats" value="30" min="1" step="1"></div>
     </div>
     <div class="acc-item book"><input type="checkbox" data-daily="situps"><div>Sit-ups<div class="meta">From the book's Total Work Method example</div></div>
-      <div class="num-field twm-target" style="display:none;"><span>DAILY REPS</span><input type="number" data-daily-target="situps" value="80" step="5"></div>
+      <div class="num-field daily-reps"><span data-daily-rep-label>REPS / SET × 4</span><input type="number" data-daily-reps="situps" value="80" min="1" step="1"></div>
     </div>
     <div class="weeks-note" style="margin-top:10px;">Total Work Method: pick a challenging-but-doable daily rep total per movement (the book's own example: 70 push-ups, 80 sit-ups, 30 burpees, 10 dead-hang chins) and chip away at it across the day, staying shy of failure on every set. Increase the total once it stops feeling hard.</div>
   </div>
@@ -489,15 +497,28 @@ const dailyMethodNotes = {
   fm: 'Multiple easy sets spread throughout the day, never to failure, one full day off per week. Add a set or a rep once the last rep of every set still feels easy.',
   twm: 'Assign a challenging-but-doable total rep count for the day per movement below, and chip away at it whenever you get a chance — never to failure. Raise the total once it stops feeling hard.'
 };
+const dailyRepLabels = {
+  fm: 'REPS / SET',
+  ladder: 'PEAK RUNG',
+  twm: 'TOTAL REPS / DAY'
+};
+function updateDailyRepLabels(method){
+  const fmSets = document.getElementById('fm-sets').value;
+  document.querySelectorAll('[data-daily-rep-label]').forEach(label=>{
+    label.textContent = method === 'fm' ? dailyRepLabels[method] + ' × ' + fmSets : dailyRepLabels[method];
+  });
+  document.getElementById('fm-set-control').style.display = method === 'fm' ? 'flex' : 'none';
+}
 document.querySelectorAll('#daily-method button').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     document.querySelectorAll('#daily-method button').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
     dailyMethodNote.textContent = dailyMethodNotes[btn.dataset.mode];
-    const isTWM = btn.dataset.mode === 'twm';
-    document.querySelectorAll('.twm-target').forEach(f => f.style.display = isTWM ? 'flex' : 'none');
+    updateDailyRepLabels(btn.dataset.mode);
   });
 });
+document.getElementById('fm-sets').addEventListener('change', ()=>updateDailyRepLabels(getDailyMethod()));
+updateDailyRepLabels(getDailyMethod());
 
 // program-type toggle
 const programNote = document.getElementById('program-mode-note');
@@ -580,13 +601,14 @@ function getDailyWork(){
   document.querySelectorAll('[data-daily]:checked').forEach(cb=>{
     const key = cb.dataset.daily;
     const label = DAILY_LABELS[key];
+    const reps = document.querySelector('[data-daily-reps="'+key+'"]')?.value || '';
     if (method === 'twm'){
-      const target = document.querySelector('[data-daily-target="'+key+'"]').value;
-      items.push(label + ' — ' + target + ' reps total, spread across the day');
+      items.push(label + ' — ' + reps + ' reps total/day, spread across the day');
     } else if (method === 'ladder'){
-      items.push(label + ' — The Ladder Method: 1-2-3 rep ladders, 3-5 ladders, a rep or two shy of failure');
+      items.push(label + ' — peak rung of ' + reps + ' reps (1 through ' + reps + '), repeated as able');
     } else {
-      items.push(label + ' — The Frequency Method: several easy sets spread through the day');
+      const fmSets = document.getElementById('fm-sets').value;
+      items.push(label + ' — ' + reps + ' reps per set for ' + fmSets + ' sets, spread through the day');
     }
   });
   return { method, items };
@@ -1083,37 +1105,59 @@ function generateExcel(){
   const { sessions, dailyWork, conditioning, weeks } = generatedProgram;
   const workbook = XLSX.utils.book_new();
   for (let week = 1; week <= weeks; week++){
-    const weekRows = [['GREYSKULL LP — WEEK ' + week], [''], ['Day', 'Section', 'Exercise', 'Prescription', 'Target Weight', 'Notes']];
+    const weekRows = [
+      ['GREYSKULL LP — WEEK ' + week],
+      ['Complete each day from top to bottom. Week 1 includes projected weights; later target-weight cells are intentionally blank.'],
+      ['Day', 'Section', 'Exercise', 'Prescription', 'Target Weight (Week 1)', 'Actual Reps', 'Notes']
+    ];
+    const merges = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 6 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 6 } }
+    ];
     sessions.filter(sess => sess.week === week).forEach(sess=>{
       const day = sess.label.replace(/^Week \d+ · /, '');
-      weekRows.push([day, '', '', '', '', '']);
+      const dayRow = weekRows.length;
+      weekRows.push([day, '', '', '', '', '', '']);
+      merges.push({ s: { r: dayRow, c: 0 }, e: { r: dayRow, c: 6 } });
 
       const isRestDay = sess.rows.length === 0 && dailyWork.items.length === 0 && sess.conditioning.length === 0 && !conditioning.includeTMAS;
       if (isRestDay){
-        weekRows.push([day, 'REST', 'No scheduled work', '', '', '']);
+        const restRow = weekRows.length;
+        weekRows.push(['', 'REST', 'No scheduled work', '', '', '', '']);
+        merges.push({ s: { r: restRow, c: 1 }, e: { r: restRow, c: 6 } });
       } else {
-        weekRows.push([day, 'LIFTING', '', '', '', '']);
+        const liftingRow = weekRows.length;
+        weekRows.push(['', 'LIFTING', '', '', '', '', '']);
+        merges.push({ s: { r: liftingRow, c: 1 }, e: { r: liftingRow, c: 6 } });
         if (sess.rows.length === 0){
-          weekRows.push([day, 'Lifting', 'N/A — no lifting scheduled today', '', '', '']);
+          weekRows.push(['', 'Lifting', 'N/A — no lifting scheduled today', '', '', '', '']);
         } else {
-          sess.rows.forEach(row=>weekRows.push([day, 'Lifting', row.ex, row.pres, sess.week === 1 ? row.weight : '', row.note]));
+          sess.rows.forEach(row=>weekRows.push(['', 'Lifting', row.ex, row.pres, sess.week === 1 ? row.weight : '', '', row.note]));
         }
       }
 
       if (dailyWork.items.length > 0){
-        weekRows.push([day, 'DAILY WORK', '', '', '', '']);
-        dailyWork.items.forEach(item=>weekRows.push([day, 'Daily Work', item, '', '', 'Complete after lifting.']));
+        const dailyRow = weekRows.length;
+        weekRows.push(['', 'DAILY WORK', '', '', '', '', '']);
+        merges.push({ s: { r: dailyRow, c: 1 }, e: { r: dailyRow, c: 6 } });
+        dailyWork.items.forEach(item=>weekRows.push(['', 'Daily Work', item, '', '', '', 'Complete after lifting.']));
       }
 
       if (sess.conditioning.length > 0 || conditioning.includeTMAS){
-        weekRows.push([day, 'CARDIO / CONDITIONING', '', '', '', '']);
-        sess.conditioning.forEach(item=>weekRows.push([day, 'Cardio', item, '', '', 'Complete after daily work.']));
-        if (conditioning.includeTMAS) weekRows.push([day, 'Cardio', '20-Minute Aerobic Solution', 'RPE ladder: 5-10', '', 'See PDF for minute-by-minute table.']);
+        const cardioRow = weekRows.length;
+        weekRows.push(['', 'CARDIO / CONDITIONING', '', '', '', '', '']);
+        merges.push({ s: { r: cardioRow, c: 1 }, e: { r: cardioRow, c: 6 } });
+        sess.conditioning.forEach(item=>weekRows.push(['', 'Cardio', item, '', '', '', 'Complete after daily work.']));
+        if (conditioning.includeTMAS) weekRows.push(['', 'Cardio', '20-Minute Aerobic Solution', 'RPE ladder: 5-10', '', '', 'See PDF for minute-by-minute table.']);
       }
+      weekRows.push(['', '', '', '', '', '', '']);
     });
 
     const weekSheet = XLSX.utils.aoa_to_sheet(weekRows);
-    weekSheet['!cols'] = [{wch:18},{wch:24},{wch:42},{wch:24},{wch:18},{wch:58}];
+    weekSheet['!merges'] = merges;
+    weekSheet['!cols'] = [{wch:4},{wch:24},{wch:46},{wch:24},{wch:20},{wch:16},{wch:58}];
+    weekSheet['!rows'] = [{hpt:24},{hpt:30},{hpt:22}];
+    weekSheet['!autofilter'] = { ref: 'A3:G' + weekRows.length };
     weekSheet['!freeze'] = { xSplit: 0, ySplit: 3 };
     XLSX.utils.book_append_sheet(workbook, weekSheet, 'Week ' + week);
   }
