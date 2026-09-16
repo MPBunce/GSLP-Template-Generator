@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Greyskull LP — Program Builder</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --bg:#16130f;
+    --panel:#211b15;
+    --panel-2:#2a231b;
+    --line:#3c3226;
+    --chalk:#e9e2d2;
+    --chalk-dim:#a89d87;
+    --rust:#b8552e;
+    --rust-dim:#8a3f22;
+    --brass:#a9822e;
+    --ok:#7c8f5a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--chalk);
+    font-family:'Segoe UI', Arial, sans-serif;
+    line-height:1.45;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:36px 22px 80px;}
+  .masthead{
+    border-bottom:3px solid var(--rust);
+    padding-bottom:18px;
+    margin-bottom:30px;
+  }
+  .masthead .kicker{
+    color:var(--brass);
+    font-size:12.5px;
+    letter-spacing:.14em;
+    font-weight:700;
+  }
+  .masthead h1{
+    font-size:40px;
+    margin:6px 0 4px;
+    font-weight:800;
+    letter-spacing:-0.01em;
+    font-stretch:condensed;
+    transform:scaleX(0.97);
+    transform-origin:left;
+  }
+  .masthead p{
+    color:var(--chalk-dim);
+    margin:0;
+    font-size:14.5px;
+    max-width:640px;
+  }
+  h2.section-title{
+    font-size:13px;
+    letter-spacing:.1em;
+    color:var(--brass);
+    border-bottom:1px solid var(--line);
+    padding-bottom:8px;
+    margin:38px 0 16px;
+    font-weight:700;
+  }
+  .rules{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-left:3px solid var(--rust);
+    padding:16px 20px;
+    font-size:13.5px;
+    color:var(--chalk-dim);
+    margin-bottom:8px;
+  }
+  .rules b{color:var(--chalk);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  @media(max-width:720px){.grid2{grid-template-columns:1fr;}}
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    padding:18px 20px 20px;
+  }
+  .card h3{
+    margin:0 0 4px;
+    font-size:18px;
+    color:var(--chalk);
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+  }
+  .card h3 .tag{font-size:11px;color:var(--rust);font-weight:700;letter-spacing:.06em;}
+  .lift-row{
+    display:grid;
+    grid-template-columns:1fr auto auto;
+    gap:10px;
+    align-items:center;
+    margin:14px 0 10px;
+    padding:10px 12px;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+  }
+  .lift-row label.name{font-size:14px;font-weight:600;}
+  .lift-row .mode-toggle{display:flex;gap:6px;}
+  .lift-row .mode-toggle button{
+    font-size:11px;padding:4px 8px;background:transparent;color:var(--chalk-dim);
+    border:1px solid var(--line);cursor:pointer;
+  }
+  .lift-row .mode-toggle button.active{background:var(--rust);color:#fff;border-color:var(--rust);}
+  .num-field{display:flex;flex-direction:column;gap:2px;}
+  .num-field span{font-size:10px;color:var(--chalk-dim);letter-spacing:.05em;}
+  input[type=number]{
+    width:72px;background:var(--bg);border:1px solid var(--line);color:var(--chalk);
+    padding:6px 8px;font-size:13px;
+  }
+  .accessory-group{margin-top:16px;}
+  .accessory-group h4{
+    font-size:11px;letter-spacing:.08em;color:var(--chalk-dim);
+    margin:16px 0 6px;font-weight:700;
+  }
+  .acc-item{
+    display:flex;align-items:flex-start;gap:9px;
+    padding:7px 4px;border-bottom:1px dotted var(--line);
+    font-size:13.5px;
+  }
+  .acc-item:last-child{border-bottom:none;}
+  .acc-item input{margin-top:3px;accent-color:var(--rust);}
+  .acc-item .meta{color:var(--chalk-dim);font-size:12px;}
+  .acc-item.book::after{
+    content:"book";
+    margin-left:auto;
+    font-size:9.5px;
+    color:var(--brass);
+    border:1px solid var(--brass);
+    padding:1px 5px;
+    height:fit-content;
+    letter-spacing:.05em;
+  }
+  .acc-item.custom::after{
+    content:"added";
+    margin-left:auto;
+    font-size:9.5px;
+    color:var(--chalk-dim);
+    border:1px solid var(--line);
+    padding:1px 5px;
+    height:fit-content;
+    letter-spacing:.05em;
+  }
+  .footer-bar{
+    position:sticky;bottom:0;
+    background:linear-gradient(180deg, transparent, var(--bg) 30%);
+    padding:26px 0 0;
+    margin-top:20px;
+    display:flex;
+    justify-content:center;
+  }
+  .export-actions{
+    display:flex;
+    justify-content:center;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .export-button{
+    border:1px solid transparent;
+    border-radius:4px;
+    padding:14px 24px;
+    min-width:190px;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:.04em;
+    cursor:pointer;
+    transition:background .2s ease, border-color .2s ease, transform .2s ease;
+  }
+  .export-button:hover{transform:translateY(-1px);}
+  #generate{
+    background:var(--rust);
+    color:#fff;
+    border-color:var(--rust);
+  }
+  #generate:hover{background:var(--rust-dim);}
+  #generate-excel{
+    background:var(--brass);
+    color:#17120d;
+    border-color:var(--brass);
+  }
+  #generate-excel:hover{background:#d6b45a;border-color:#d6b45a;}
+  #status{
+    text-align:center;color:var(--chalk-dim);font-size:12.5px;margin-top:10px;min-height:16px;
+  }
+  .section-banner{
+    background:var(--panel-2);
+    border:1px solid var(--rust-dim);
+    border-left:5px solid var(--rust);
+    padding:14px 18px;
+    margin:44px 0 4px;
+  }
+  .section-banner .num{
+    color:var(--rust);
+    font-size:22px;
+    font-weight:800;
+    margin-right:10px;
+  }
+  .section-banner .title{
+    font-size:17px;
+    font-weight:800;
+    letter-spacing:.02em;
+  }
+  .section-banner .sub{
+    color:var(--chalk-dim);
+    font-size:12.5px;
+    margin-top:4px;
+  }
+  .weeks-note{color:var(--chalk-dim);font-size:12.5px;margin-top:6px;}
+  .small-field{display:flex;align-items:center;gap:8px;font-size:13px;margin-top:12px;color:var(--chalk-dim);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <div class="kicker">CUSTOM PROGRAM BUILDER · BASED ON THE GREYSKULL LP, 3RD EDITION</div>
+    <h1 id="page-title">Build Your Four Weeks</h1>
+    <p id="page-description">Set your starting weights and increments, pick your accessory work, and generate a printable 4-week log — sourced from the book's own rep schemes and reset math, not generic defaults.</p>
+  </div>
+
+  <div class="rules">
+    <b>Core mechanic — 2x5, 1x5+:</b> squat, bench, press and front squat are worked for two sets of five, then a third set taken to failure (not stopped at 5). Deadlift is one hard working set only.<br>
+    <b>Standard increments:</b> squat/deadlift +5 lb (2 kg) per session · press/bench +2.5 lb (1 kg) per session.<br>
+    <b>Doubling rule:</b> if your last set goes past 10 reps, consider doubling next session's jump instead of holding pace.<br>
+    <b>The reset:</b> when you fail to hit 5 reps on the last set, drop to 90% of that weight (round down to the nearest increment) and climb back up at your normal pace — you'll usually set new rep records on the way back up before you retake the old sticking point.
+  </div>
+
+  <div class="section-banner">
+    <span class="num">1</span><span class="title">LIFTING — THE CORE PROGRAM</span>
+    <div class="sub">The barbell work: squat, bench, deadlift, press. This is the layer everything else gets built on top of.</div>
+  </div>
+
+  <h2 class="section-title">PROGRAM TYPE</h2>
+  <div class="card">
+    <div class="mode-toggle" id="program-mode" style="gap:10px;">
+      <button data-mode="3day" class="active" style="padding:10px 16px;font-size:13px;">3-Day Full Body <span style="opacity:.7;">(the "OG" Base Program)</span></button>
+      <button data-mode="phraxture" style="padding:10px 16px;font-size:13px;">3-Day Phraxture</button>
+      <button data-mode="4day" style="padding:10px 16px;font-size:13px;">4-Day Upper/Lower</button>
+    </div>
+    <div class="weeks-note" id="program-mode-note" style="margin-top:12px;">
+      The book's original template: Press+Squat, Bench+Deadlift, Press+Squat — three sessions a week, with Bench and Press swapping which day they land on every other week so both get equal work.
+    </div>
+  </div>
+
+  <h2 class="section-title">MAIN LIFTS &amp; STARTING NUMBERS</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3>Squat</h3>
+      <div class="lift-row">
+        <div class="num-field"><span>VARIANT</span><select id="squat-variant"><option>Squat</option><option>Front squat</option><option>Box squat</option><option>Specialty bar squat</option></select></div>
+        <div class="num-field"><span>START (LB)</span><input type="number" id="squat-start" value="135" step="5"></div>
+        <div class="num-field"><span>+ PER SESSION</span><input type="number" id="squat-inc" value="5" step="0.5"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Deadlift</h3>
+      <div class="lift-row">
+        <div class="num-field"><span>VARIANT</span><select id="dl-variant"><option>Deadlift</option><option>Deficit deadlift</option><option>Rack pull</option><option>Snatch-grip deadlift</option></select></div>
+        <div class="num-field"><span>START (LB)</span><input type="number" id="dl-start" value="185" step="5"></div>
+        <div class="num-field"><span>+ PER SESSION</span><input type="number" id="dl-inc" value="5" step="0.5"></div>
+      </div>
+      <div class="weeks-note">One hard working set only — 1 x 5+.</div>
+    </div>
+    <div class="card">
+      <h3>Bench Press</h3>
+      <div class="lift-row">
+        <div class="num-field"><span>VARIANT</span><select id="bench-variant"><option>Bench Press</option><option>Incline bench press</option><option>Decline bench press</option><option>Close-grip bench press</option><option>Dumbbell bench press</option><option>Floor press</option><option>Dips</option></select></div>
+        <div class="num-field"><span>START (LB)</span><input type="number" id="bench-start" value="115" step="2.5"></div>
+        <div class="num-field"><span>+ PER SESSION</span><input type="number" id="bench-inc" value="2.5" step="0.5"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Press</h3>
+      <div class="lift-row">
+        <div class="num-field"><span>VARIANT</span><select id="press-variant"><option>Press (overhead)</option><option>Push press</option><option>Seated press</option><option>Seated dumbbell press</option><option>Clean and press</option></select></div>
+        <div class="num-field"><span>START (LB)</span><input type="number" id="press-start" value="65" step="2.5"></div>
+        <div class="num-field"><span>+ PER SESSION</span><input type="number" id="press-inc" value="2.5" step="0.5"></div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section-title" id="additional-strength-title">ADDITIONAL STRENGTH MOVEMENTS (FULL-BODY DAYS)</h2>
+  <div class="weeks-note" id="additional-strength-note" style="margin-bottom:12px;">For the 3-day full-body setup, add lower-body and upper-body movements to the squat/press days. Deadlift days use the upper-body add-ons. Chin-ups, push-ups, and other pure-bodyweight work live in Section 2 below.</div>
+  <div class="grid2">
+    <div class="card">
+      <h3 id="lower-addons-heading">Full-Body Day: Lower Add-ons</h3>
+      <div class="accessory-group">
+        <h4>FROM THE BOOK</h4>
+        <div class="acc-item book"><input type="checkbox" data-day="lower" data-name="Direct Abdominal Work" data-sets="2 x 10-12" checked><div>Direct Abdominal Work<div class="meta">2 sets of 10-12 reps</div></div></div>
+        <div class="acc-item book"><input type="checkbox" data-day="lower" data-name="Direct Calf Work" data-sets="1 x 15-20 (slow)" checked><div>Direct Calf Work<div class="meta">1 set, 15-20 slow reps</div></div></div>
+        <div class="acc-item book"><input type="checkbox" data-day="lower" data-name="Olympic Lift Variant" data-sets="5-6 singles"><div>Olympic Lift Variant (clean/snatch pulls etc.)<div class="meta">5-6 singles per session</div></div></div>
+      </div>
+      <div class="accessory-group">
+        <h4>NOT IN THE ORIGINAL TEXT — COMMON ADDITIONS</h4>
+        <div class="acc-item custom"><input type="checkbox" data-day="lower" data-name="Single-Leg RDL" data-sets="3 x 8-12/leg (double progression)"><div>Single-Leg RDL<div class="meta">3 sets, 8-12/leg — add reps, then weight</div></div></div>
+        <div class="acc-item custom"><input type="checkbox" data-day="lower" data-name="Split Squat" data-sets="3 x 8-12/leg (double progression)"><div>Split Squat<div class="meta">3 sets, 8-12/leg — add reps, then weight</div></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3 id="upper-addons-heading">Full-Body Day: Upper Add-ons</h3>
+      <div class="accessory-group">
+        <h4>FROM THE BOOK</h4>
+        <div class="acc-item book"><input type="checkbox" data-day="upper" data-name="Row Variant" data-sets="2 x 6-8" checked><div>Row Variant<div class="meta">2 sets of 6-8 reps</div></div></div>
+        <div class="acc-item book"><input type="checkbox" data-day="upper" data-name="Curl Variant" data-sets="2 x 10-12"><div>Curl Variant<div class="meta">2 sets of 10-12 reps</div></div></div>
+        <div class="acc-item book"><input type="checkbox" data-day="upper" data-name="Neck Extension" data-sets="4 x 25+"><div>Neck Extension (harness)<div class="meta">4 sets of 25+ reps</div></div></div>
+        <div class="acc-item book"><input type="checkbox" data-day="upper" data-name="Pull-over" data-sets="2 x 8-10"><div>Pull-over<div class="meta">2 sets of 8-10 reps</div></div></div>
+        <div class="acc-item book"><input type="checkbox" data-day="upper" data-name="Dips (weighted)" data-sets="2 x 6-8 (if weighted)"><div>Dips (weighted)<div class="meta">2 sets of 6-8 reps — only if loading them; bodyweight dips live in Section 2</div></div></div>
+        <div class="acc-item book"><input type="checkbox" data-day="upper" data-name="Weighted Chin/Pull-up Variant" data-sets="2 x 6-8 (if weighted)"><div>Weighted Chin/Pull-up Variant<div class="meta">2 sets of 6-8 reps — an extra weighted variant on top of Section 2's daily chins</div></div></div>
+        <div class="acc-item book"><input type="checkbox" data-day="upper" data-name="Forearm Work" data-sets="2 x 12-20"><div>Forearm Work<div class="meta">2 sets of 12-20 reps</div></div></div>
+        <div class="acc-item book"><input type="checkbox" data-day="upper" data-name="Cable Arm Movement" data-sets="2-3 x 10-12" checked><div>Cable Arm Movement (triceps/delts)<div class="meta">10-12 rep range</div></div></div>
+        <div class="acc-item book"><input type="checkbox" data-day="upper" data-name="Olympic Lift Variant" data-sets="5-6 singles"><div>Olympic Lift Variant<div class="meta">5-6 singles per session</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SECTION 2: DAILY WORK ============ -->
+  <div class="section-banner">
+    <span class="num">2</span><span class="title">DAILY WORK — THE BODYWEIGHT LAYER</span>
+    <div class="sub">The book's "Section Two: Bodyweight Training." Runs every day, independent of which lifting day it is — never taken to failure, always a little more than last week.</div>
+  </div>
+
+  <h2 class="section-title">METHOD</h2>
+  <div class="card">
+    <div class="mode-toggle" id="daily-method" style="gap:10px;">
+      <button data-mode="fm" class="active" style="padding:10px 16px;font-size:13px;">The Frequency Method (FM)</button>
+      <button data-mode="ladder" style="padding:10px 16px;font-size:13px;">The Ladder Method</button>
+      <button data-mode="twm" style="padding:10px 16px;font-size:13px;">The Total Work Method</button>
+    </div>
+    <div class="weeks-note" id="daily-method-note" style="margin-top:12px;">
+      Multiple easy sets spread throughout the day, never to failure, one full day off per week. Add a set or a rep once the last rep of every set still feels easy.
+    </div>
+  </div>
+
+  <h2 class="section-title">MOVEMENTS</h2>
+  <div class="card">
+    <div class="acc-item book"><input type="checkbox" data-daily="pullups" checked><div>Chin-ups / Pull-ups<div class="meta">Book's primary daily movement</div></div>
+      <div class="num-field twm-target" style="display:none;"><span>DAILY REPS</span><input type="number" data-daily-target="pullups" value="10" step="2"></div>
+    </div>
+    <div class="acc-item book"><input type="checkbox" data-daily="pushups" checked><div>Push-ups<div class="meta">Commonly paired with chins in the book's own sample weeks</div></div>
+      <div class="num-field twm-target" style="display:none;"><span>DAILY REPS</span><input type="number" data-daily-target="pushups" value="70" step="5"></div>
+    </div>
+    <div class="acc-item book"><input type="checkbox" data-daily="dips"><div>Dips<div class="meta">Same three methods apply</div></div>
+      <div class="num-field twm-target" style="display:none;"><span>DAILY REPS</span><input type="number" data-daily-target="dips" value="30" step="5"></div>
+    </div>
+    <div class="acc-item book"><input type="checkbox" data-daily="squats"><div>Bodyweight Squats<div class="meta">Daily squat pattern work</div></div>
+      <div class="num-field twm-target" style="display:none;"><span>DAILY REPS</span><input type="number" data-daily-target="squats" value="30" step="5"></div>
+    </div>
+    <div class="acc-item book"><input type="checkbox" data-daily="situps"><div>Sit-ups<div class="meta">From the book's Total Work Method example</div></div>
+      <div class="num-field twm-target" style="display:none;"><span>DAILY REPS</span><input type="number" data-daily-target="situps" value="80" step="5"></div>
+    </div>
+    <div class="weeks-note" style="margin-top:10px;">Total Work Method: pick a challenging-but-doable daily rep total per movement (the book's own example: 70 push-ups, 80 sit-ups, 30 burpees, 10 dead-hang chins) and chip away at it across the day, staying shy of failure on every set. Increase the total once it stops feeling hard.</div>
+  </div>
+
+  <!-- ============ SECTION 3: CONDITIONING ============ -->
+  <div class="section-banner">
+    <span class="num">3</span><span class="title">CONDITIONING — CARDIO</span>
+    <div class="sub">Sections Three &amp; Four of the book: High Intensity Conditioning and Low Intensity Conditioning. Optional layers on top of the first two.</div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>High Intensity Conditioning</h3>
+      <div class="small-field" style="margin-top:0;">
+        <input type="checkbox" id="hic-enable" checked>
+        <label for="hic-enable">Include high intensity sessions</label>
+      </div>
+      <div class="lift-row">
+        <label class="name">Sessions / week</label>
+        <div class="num-field"><span>COUNT</span><input type="number" id="hic-count" value="2" min="0" max="4" step="1"></div>
+      </div>
+      <div class="weeks-note">The book's "10-minute rule": keep these short and brutally intense — 10 minutes is about the ceiling. Default placement: right after a lifting day, plus one standalone session (e.g. the weekend).</div>
+    </div>
+    <div class="card">
+      <h3>Low Intensity Conditioning</h3>
+      <div class="small-field" style="margin-top:0;">
+        <input type="checkbox" id="lic-enable" checked>
+        <label for="lic-enable">Include fasted walking</label>
+      </div>
+      <div class="lift-row">
+        <label class="name">Days / week</label>
+        <div class="num-field"><span>COUNT</span><input type="number" id="lic-days" value="5" min="0" max="7" step="1"></div>
+        <div class="num-field"><span>MINUTES</span><input type="number" id="lic-minutes" value="25" min="5" max="90" step="5"></div>
+      </div>
+      <div class="weeks-note">The book's preferred low-intensity tool: fasted walking, done often. Its value comes from frequency, not intensity — it's the least "sexy" layer but effective for fat loss.</div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>The 20-Minute Aerobic Solution</h3>
+      <div class="small-field" style="margin-top:0;">
+        <input type="checkbox" id="tmas-enable">
+        <label for="tmas-enable">Include this protocol (borrowed from Bill Phillips)</label>
+      </div>
+      <div class="small-field">
+        <input type="checkbox" id="aerobic-burpees">
+        <label for="aerobic-burpees">Add Burpee Challenge (VC1)</label>
+        <input type="number" id="aerobic-burpees-reps" value="30" min="1" step="5" style="width:62px;">
+        <span>reps</span>
+        <input type="number" id="aerobic-burpees-days" value="6" min="1" max="7" step="1" style="width:52px;">
+        <span>days/week</span>
+      </div>
+      <div class="weeks-note">A 20-minute RPE-ladder interval session on any cardio machine — effort climbs 5→9 in waves, capped with an all-out minute 19. The Burpee Challenge is recommended six days per week, starting around 3 sets of 10 and progressing toward 100 reps in 5 minutes.</div>
+    </div>
+    <div class="card">
+      <h3>Ruck Marching (Bonus Layer)</h3>
+      <div class="small-field" style="margin-top:0;">
+        <input type="checkbox" id="ruck-enable">
+        <label for="ruck-enable">Include ruck marching</label>
+      </div>
+      <div class="lift-row">
+        <label class="name">Load / Duration</label>
+        <div class="num-field"><span>LB</span><input type="number" id="ruck-weight" value="35" step="5"></div>
+        <div class="num-field"><span>MIN</span><input type="number" id="ruck-minutes" value="45" step="5"></div>
+      </div>
+      <div class="weeks-note">Book's advice: start light (≤35 lb) and short, progress distance/speed before load, work up to 45-60 min several days/week.</div>
+    </div>
+  </div>
+
+  <h2 class="section-title">SCHEDULE</h2>
+  <div class="card">
+    <div class="small-field" style="margin-top:0;">
+      <span>Weeks to generate:</span>
+      <select id="num-weeks" style="width:92px;">
+        <option value="4">4 weeks</option>
+        <option value="6">6 weeks</option>
+      </select>
+    </div>
+    <div class="weeks-note" id="schedule-note">3 sessions/week: Press+Squat, Bench+Deadlift, Press+Squat — then Bench and Press swap places the following week, exactly as laid out in the book. Weights are projected assuming you hit every prescribed rep — if you reset on a lift mid-plan, cross out the rest of that lift's projected numbers and restart from 90% by hand using the rule above.</div>
+  </div>
+
+  <div class="footer-bar">
+    <div style="text-align:center;width:100%;">
+      <div class="export-actions">
+        <button id="generate" class="export-button">Generate 4-Week PDF</button>
+        <button id="generate-excel" class="export-button" type="button">Generate Excel Doc</button>
+      </div>
+      <div id="status"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ---- mode toggles ----
+function wireToggle(groupId, weightFieldId){
+  const group = document.getElementById(groupId);
+  const field = document.getElementById(weightFieldId);
+  group.querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      group.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      field.style.display = btn.dataset.mode === 'wt' ? 'flex' : 'none';
+    });
+  });
+}
+// Daily Work method toggle (3 options) — custom wiring, not the generic 2-button wireToggle
+const dailyMethodNote = document.getElementById('daily-method-note');
+const dailyMethodNotes = {
+  ladder: 'Ladders of 1-2-3 reps (rest as needed between), repeated for 3-5 ladders — stop a rep or two shy of the top rung\'s failure point, and add a rung or a ladder once it\'s easy.',
+  fm: 'Multiple easy sets spread throughout the day, never to failure, one full day off per week. Add a set or a rep once the last rep of every set still feels easy.',
+  twm: 'Assign a challenging-but-doable total rep count for the day per movement below, and chip away at it whenever you get a chance — never to failure. Raise the total once it stops feeling hard.'
+};
+document.querySelectorAll('#daily-method button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('#daily-method button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    dailyMethodNote.textContent = dailyMethodNotes[btn.dataset.mode];
+    const isTWM = btn.dataset.mode === 'twm';
+    document.querySelectorAll('.twm-target').forEach(f => f.style.display = isTWM ? 'flex' : 'none');
+  });
+});
+
+// program-type toggle
+const programNote = document.getElementById('program-mode-note');
+const scheduleNote = document.getElementById('schedule-note');
+const additionalStrengthTitle = document.getElementById('additional-strength-title');
+const additionalStrengthNote = document.getElementById('additional-strength-note');
+const lowerAddonsHeading = document.getElementById('lower-addons-heading');
+const upperAddonsHeading = document.getElementById('upper-addons-heading');
+
+function updateAdditionalStrengthLabels(mode){
+  const isUpperLower = mode === '4day';
+  additionalStrengthTitle.textContent = isUpperLower
+    ? 'ADDITIONAL STRENGTH MOVEMENTS (TIED TO UPPER/LOWER DAYS)'
+    : 'ADDITIONAL STRENGTH MOVEMENTS (FULL-BODY DAYS)';
+  additionalStrengthNote.textContent = isUpperLower
+    ? 'For the 4-day Upper/Lower setup, upper add-ons appear on upper days and lower add-ons appear on lower days. Chin-ups, push-ups, and other pure-bodyweight work live in Section 2 below.'
+    : 'For the 3-day full-body setup, add lower-body and upper-body movements to the squat/press days. Deadlift days use the upper-body add-ons. Chin-ups, push-ups, and other pure-bodyweight work live in Section 2 below.';
+  lowerAddonsHeading.textContent = isUpperLower ? 'Lower Day Add-ons' : 'Full-Body Day: Lower Add-ons';
+  upperAddonsHeading.textContent = isUpperLower ? 'Upper Day Add-ons' : 'Full-Body Day: Upper Add-ons';
+}
+
+document.querySelectorAll('#program-mode button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('#program-mode button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    updateAdditionalStrengthLabels(btn.dataset.mode);
+    if (btn.dataset.mode === '3day'){
+      programNote.textContent = 'The book\'s original template: Press+Squat, Bench+Deadlift, Press+Squat — three sessions a week, with Bench and Press swapping which day they land on every other week so both get equal work.';
+      scheduleNote.textContent = '3 sessions/week: Press+Squat, Bench+Deadlift, Press+Squat — then Bench and Press swap places the following week, exactly as laid out in the book. Weights are projected assuming you hit every prescribed rep — if you reset on a lift mid-plan, cross out the rest of that lift\'s projected numbers and restart from 90% by hand using the rule above.';
+    } else if (btn.dataset.mode === 'phraxture'){
+      programNote.textContent = 'A 3-day variation: press and squat on the outer days, bench and deadlift in the middle, with weighted pull-ups on the outer days and bent rows on deadlift day.';
+      scheduleNote.textContent = '3 sessions/week: Press + Squat + Weighted Pull-ups, Bench + Deadlift + Bent Row, Press + Squat + Weighted Pull-ups. Both back movements use 2x5, 1x5+.';
+    } else {
+      programNote.textContent = 'A 4-day split adapted to Upper/Lower: Bench and Press alternate across the two upper days (swapping which day each week), Squat runs both lower days, and Deadlift takes the place of one of those squat sessions once a week — the same squat-heavy, deadlift-light balance as the book\'s 3-day version, just spread across 4 days.';
+      scheduleNote.textContent = '4 sessions/week: Day 1 Upper, Day 2 Lower (Squat), Day 3 Upper, Day 4 Lower (Deadlift in place of Squat) — Bench/Press swap upper days each week. Weights are projected assuming you hit every prescribed rep — if you reset on a lift mid-plan, cross out the rest of that lift\'s projected numbers and restart from 90% by hand using the rule above.';
+    }
+  });
+});
+updateAdditionalStrengthLabels(getProgramMode());
+
+
+function getMode(groupId){
+  return document.querySelector('#'+groupId+' button.active').dataset.mode;
+}
+function getProgramMode(){
+  return document.querySelector('#program-mode button.active').dataset.mode;
+}
+function getDailyMethod(){
+  return document.querySelector('#daily-method button.active').dataset.mode;
+}
+
+document.getElementById('generate').addEventListener('click', generatePDF);
+document.getElementById('generate-excel').addEventListener('click', generateExcel);
+const weeksSelector = document.getElementById('num-weeks');
+const pageTitle = document.getElementById('page-title');
+const pageDescription = document.getElementById('page-description');
+const generateButton = document.getElementById('generate');
+const generateExcelButton = document.getElementById('generate-excel');
+
+function updateDurationLabels(){
+  const weeks = weeksSelector.value;
+  const label = weeks === '6' ? 'Six' : 'Four';
+  pageTitle.textContent = 'Build Your ' + label + ' Weeks';
+  pageDescription.textContent = 'Set your starting weights and increments, pick your accessory work, and generate a printable ' + weeks + '-week log — sourced from the book\'s own rep schemes and reset math, not generic defaults.';
+  generateButton.textContent = 'Generate ' + weeks + '-Week PDF';
+  generateExcelButton.textContent = 'Generate ' + weeks + '-Week Excel';
+}
+
+weeksSelector.addEventListener('change', updateDurationLabels);
+updateDurationLabels();
+
+function round5(x){ return Math.round(x/5)*5; }
+
+const DAILY_LABELS = {
+  pullups: 'Chin-ups/Pull-ups', pushups: 'Push-ups', dips: 'Dips', squats: 'Bodyweight Squats', situps: 'Sit-ups'
+};
+
+function getDailyWork(){
+  const method = getDailyMethod();
+  const items = [];
+  document.querySelectorAll('[data-daily]:checked').forEach(cb=>{
+    const key = cb.dataset.daily;
+    const label = DAILY_LABELS[key];
+    if (method === 'twm'){
+      const target = document.querySelector('[data-daily-target="'+key+'"]').value;
+      items.push(label + ' — ' + target + ' reps total, spread across the day');
+    } else if (method === 'ladder'){
+      items.push(label + ' — The Ladder Method: 1-2-3 rep ladders, 3-5 ladders, a rep or two shy of failure');
+    } else {
+      items.push(label + ' — The Frequency Method: several easy sets spread through the day');
+    }
+  });
+  return { method, items };
+}
+
+function getConditioningPlan(){
+  const plan = [];
+  if (document.getElementById('hic-enable').checked){
+    const n = document.getElementById('hic-count').value;
+    plan.push('High Intensity Conditioning — ' + n + ' session(s)/week, 10 minutes or less, placed after a lifting day and/or standalone.');
+  }
+  if (document.getElementById('lic-enable').checked){
+    const d = document.getElementById('lic-days').value;
+    const m = document.getElementById('lic-minutes').value;
+    plan.push('Low Intensity Conditioning — fasted walking, ' + d + ' day(s)/week, ~' + m + ' minutes.');
+  }
+  if (document.getElementById('ruck-enable').checked){
+    const w = document.getElementById('ruck-weight').value;
+    const m = document.getElementById('ruck-minutes').value;
+    plan.push('Ruck March (bonus layer) — ' + w + ' lb pack, ~' + m + ' minutes, several days/week.');
+  }
+  if (document.getElementById('aerobic-burpees').checked){
+    const reps = document.getElementById('aerobic-burpees-reps').value;
+    const days = document.getElementById('aerobic-burpees-days').value;
+    plan.push('Burpee Challenge (Villain Challenge 1) — ' + reps + ' reps, ' + days + ' day(s)/week, progressing toward 100 reps in 5 minutes.');
+  }
+  const includeTMAS = document.getElementById('tmas-enable').checked;
+  return { plan, includeTMAS };
+}
+
+let generatedProgram = null;
+
+function generatePDF(shouldDownload = true){
+  const status = document.getElementById('status');
+  status.textContent = 'Building your program…';
+
+  const weeks = parseInt(document.getElementById('num-weeks').value) || 4;
+  const progMode = getProgramMode();
+
+  const squatStart = parseFloat(document.getElementById('squat-start').value);
+  const squatInc = parseFloat(document.getElementById('squat-inc').value);
+  const dlStart = parseFloat(document.getElementById('dl-start').value);
+  const dlInc = parseFloat(document.getElementById('dl-inc').value);
+  const benchStart = parseFloat(document.getElementById('bench-start').value);
+  const benchInc = parseFloat(document.getElementById('bench-inc').value);
+  const pressStart = parseFloat(document.getElementById('press-start').value);
+  const pressInc = parseFloat(document.getElementById('press-inc').value);
+
+  const lowerAcc = [...document.querySelectorAll('.acc-item input[data-day="lower"]:checked')]
+      .map(el=>({name:el.dataset.name, sets:el.dataset.sets}));
+  const upperAcc = [...document.querySelectorAll('.acc-item input[data-day="upper"]:checked')]
+      .map(el=>({name:el.dataset.name, sets:el.dataset.sets}));
+
+  const dailyWork = getDailyWork();
+  const conditioning = getConditioningPlan();
+
+  // session counters per lift (increment happens per occurrence of that lift)
+  let squatCount = 0, dlCount = 0, benchCount = 0, pressCount = 0;
+  const liftName = id => document.getElementById(id).value;
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+  const pageW = 612, marginX = 46;
+  let y = 0;
+
+  function newPage(){
+    doc.addPage();
+    y = 50;
+  }
+  function ensureRoom(h){
+    if (y + h > 740){ newPage(); }
+  }
+  function header(title, sub){
+    doc.setFillColor(24,20,16);
+    doc.rect(0,0,pageW,64,'F');
+    doc.setTextColor(233,226,210);
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(17);
+    doc.text(title, marginX, 30);
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(9.5);
+    doc.setTextColor(200,190,170);
+    doc.text(sub, marginX, 46);
+    doc.setTextColor(20,20,20);
+    y = 84;
+  }
+
+  // ---- Cover / rules page ----
+  doc.setFillColor(22,19,15);
+  doc.rect(0,0,pageW,792,'F');
+  doc.setTextColor(184,85,46);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(11);
+  doc.text('CUSTOM PROGRAM BUILDER', marginX, 110);
+  doc.setTextColor(233,226,210);
+  doc.setFontSize(30);
+  doc.text('Greyskull LP', marginX, 140);
+  doc.setFontSize(16);
+  doc.setFont('helvetica','normal');
+  doc.text(weeks + '-Week Training Log', marginX, 164);
+
+  doc.setFontSize(10.5);
+  doc.setTextColor(200,190,170);
+  const rulesText = [
+    'CORE MECHANIC — 2x5, 1x5+',
+    'Squat, bench press, and overhead press: two sets of five, then a third',
+    'set taken to true failure (not stopped arbitrarily at 5). Deadlift-style single-set',
+    'lifts get one hard working set only.',
+    '',
+    'STANDARD INCREMENTS',
+    'Squat / deadlift-pattern lifts: +5 lb (2 kg) per successful session.',
+    'Press / bench-pattern lifts: +2.5 lb (1 kg) per successful session.',
+    '',
+    'THE DOUBLING RULE',
+    'If your last set goes past 10 reps, consider doubling the next jump rather than',
+    'holding your normal pace — the weight is behind where you actually are.',
+    '',
+    'THE GREYSKULL RESET',
+    'Fail to get 5 reps on the last working set? Drop to 90% of that weight, rounded',
+    'down to your nearest increment, and climb back up at your normal pace. You will',
+    'usually beat your old rep records at the lighter weights on the way back up',
+    'before you retake the sticking point — that is the point of the reset, not a',
+    'failure of the program.',
+    '',
+    'This log projects your working weight forward assuming a clean run. If you miss',
+    'reps on a lift partway through, stop following the printed numbers for that lift,',
+    'apply the reset by hand, and pick the pattern back up once you have re-passed',
+    'the old number.'
+  ];
+  let ty = 200;
+  rulesText.forEach(line=>{
+    if (line.startsWith('CORE') || line.startsWith('STANDARD') || line.startsWith('THE')){
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(10.5);
+      doc.setTextColor(169,130,46);
+    } else {
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(10);
+      doc.setTextColor(200,190,170);
+    }
+    doc.text(line, marginX, ty);
+    ty += 14;
+  });
+
+  function pressRow(){
+    const wt = pressStart + pressInc * pressCount;
+    pressCount++;
+    return { ex: liftName('press-variant'), pres: '2x5, 1x5+', weight: wt + ' lb', note: '+' + pressInc + ' lb next session if you complete all 3 sets.' };
+  }
+  function benchRow(){
+    const wt = benchStart + benchInc * benchCount;
+    benchCount++;
+    return { ex: liftName('bench-variant'), pres: '2x5, 1x5+', weight: wt + ' lb', note: '+' + benchInc + ' lb next session if you complete all 3 sets.' };
+  }
+  function squatRow(){
+    const wt = squatStart + squatInc * squatCount;
+    squatCount++;
+    return { ex: liftName('squat-variant'), pres: '2x5, 1x5+', weight: wt + ' lb', note: '+' + squatInc + ' lb next session if you complete all 3 sets.' };
+  }
+  function deadliftRow(){
+    const wt = dlStart + dlInc * dlCount;
+    dlCount++;
+    return { ex: liftName('dl-variant'), pres: '1 x 5+', weight: wt + ' lb', note: '+' + dlInc + ' lb next session if you hit 5+ reps.' };
+  }
+  function phraxturePullRow(name){
+    return { ex: name, pres: '2x5, 1x5+', weight: '—', note: '' };
+  }
+
+  // ---- Build the session list for the requested number of weeks ----
+  const sessions = []; // each: {label, rows[]}
+
+  if (progMode === '3day' || progMode === 'phraxture'){
+    for (let w = 1; w <= weeks; w++){
+      const benchOnWedThisWeek = (w % 2 === 1); // Week 1,3,5..: Bench+DL on the middle day, Press+Squat on the outer days
+      const outerLift = benchOnWedThisWeek ? pressRow : benchRow;
+      const outerName = benchOnWedThisWeek ? 'Press' : 'Bench Press';
+      const middleLift = benchOnWedThisWeek ? benchRow : pressRow;
+      const middleName = benchOnWedThisWeek ? 'Bench Press' : 'Press';
+
+      [
+        { label: 'Week ' + w + ' · Day A (' + outerName + ' + Squat)', rows: () => {
+            const r = [outerLift(), squatRow()];
+            if (progMode === 'phraxture') r.push(phraxturePullRow('Weighted Pull-ups'));
+            lowerAcc.forEach(a => r.push({ ex: a.name, pres: a.sets, weight: '—', note: '' }));
+            upperAcc.forEach(a => r.push({ ex: a.name, pres: a.sets, weight: '—', note: '' }));
+            return r;
+          }},
+        { label: 'Week ' + w + ' · Day B (' + middleName + ' + Deadlift)', rows: () => {
+            const r = [middleLift(), deadliftRow()];
+            if (progMode === 'phraxture') r.push(phraxturePullRow('Bent Row'));
+            upperAcc.forEach(a => r.push({ ex: a.name, pres: a.sets, weight: '—', note: '' }));
+            return r;
+          }},
+        { label: 'Week ' + w + ' · Day C (' + outerName + ' + Squat)', rows: () => {
+            const r = [outerLift(), squatRow()];
+            if (progMode === 'phraxture') r.push(phraxturePullRow('Weighted Pull-ups'));
+            lowerAcc.forEach(a => r.push({ ex: a.name, pres: a.sets, weight: '—', note: '' }));
+            upperAcc.forEach(a => r.push({ ex: a.name, pres: a.sets, weight: '—', note: '' }));
+            return r;
+          }},
+      ].forEach(s => sessions.push({ label: s.label, type: 'lift', rows: s.rows() }));
+
+      sessions.push({ label: 'Week ' + w + ' · Daily Work + Conditioning', type: 'daily', week: w });
+    }
+  } else {
+    // 4-day upper/lower
+    for (let w = 1; w <= weeks; w++){
+      const pressOnDay1 = (w % 2 === 1); // swap which day gets Press vs Bench each week
+      const day1Lift = pressOnDay1 ? pressRow : benchRow;
+      const day1Name = pressOnDay1 ? 'Press' : 'Bench Press';
+      const day3Lift = pressOnDay1 ? benchRow : pressRow;
+      const day3Name = pressOnDay1 ? 'Bench Press' : 'Press';
+
+      sessions.push({ label: 'Week ' + w + ' · Day 1 — Upper (' + day1Name + ')', type: 'lift', rows: (() => {
+          const r = [day1Lift()];
+          upperAcc.forEach(a => r.push({ ex: a.name, pres: a.sets, weight: '—', note: '' }));
+          return r;
+        })() });
+
+      sessions.push({ label: 'Week ' + w + ' · Day 2 — Lower (Squat)', type: 'lift', rows: (() => {
+          const r = [squatRow()];
+          lowerAcc.forEach(a => r.push({ ex: a.name, pres: a.sets, weight: '—', note: '' }));
+          return r;
+        })() });
+
+      sessions.push({ label: 'Week ' + w + ' · Day 3 — Upper (' + day3Name + ')', type: 'lift', rows: (() => {
+          const r = [day3Lift()];
+          upperAcc.forEach(a => r.push({ ex: a.name, pres: a.sets, weight: '—', note: '' }));
+          return r;
+        })() });
+
+      sessions.push({ label: 'Week ' + w + ' · Day 4 — Lower (Deadlift)', type: 'lift', rows: (() => {
+          const r = [deadliftRow()];
+          lowerAcc.forEach(a => r.push({ ex: a.name, pres: a.sets, weight: '—', note: '' }));
+          return r;
+        })() });
+
+      sessions.push({ label: 'Week ' + w + ' · Daily Work + Conditioning', type: 'daily', week: w });
+    }
+  }
+
+  generatedProgram = { sessions, dailyWork, conditioning, weeks };
+
+  sessions.forEach((sess) => {
+    newPage();
+
+    if (sess.type === 'daily'){
+      header(sess.label, 'Section 2 (Daily Work) + Section 3 (Conditioning) — applies every day this week, lifting or not');
+
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(11);
+      doc.setTextColor(184,85,46);
+      doc.text('DAILY WORK', marginX, y);
+      y += 18;
+
+      if (dailyWork.items.length === 0){
+        doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(120,120,120);
+        doc.text('No daily bodyweight work selected.', marginX, y);
+        y += 20;
+      } else {
+        dailyWork.items.forEach(line=>{
+          ensureRoom(20);
+          doc.setFont('helvetica','normal');
+          doc.setFontSize(10.5);
+          doc.setTextColor(30,30,30);
+          doc.text('•  ' + line, marginX, y, {maxWidth: pageW - marginX*2 - 10});
+          y += 18;
+        });
+      }
+      y += 14;
+
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(11);
+      doc.setTextColor(184,85,46);
+      doc.text('CONDITIONING', marginX, y);
+      y += 18;
+
+      if (conditioning.plan.length === 0){
+        doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(120,120,120);
+        doc.text('No conditioning work selected.', marginX, y);
+        y += 20;
+      } else {
+        conditioning.plan.forEach(line=>{
+          ensureRoom(20);
+          doc.setFont('helvetica','normal');
+          doc.setFontSize(10.5);
+          doc.setTextColor(30,30,30);
+          doc.text('•  ' + line, marginX, y, {maxWidth: pageW - marginX*2 - 10});
+          y += 18;
+        });
+      }
+
+      if (conditioning.includeTMAS){
+        y += 16;
+        ensureRoom(60);
+        doc.setFont('helvetica','bold');
+        doc.setFontSize(11);
+        doc.setTextColor(184,85,46);
+        doc.text('THE 20-MINUTE AEROBIC SOLUTION', marginX, y);
+        y += 16;
+        doc.setFont('helvetica','normal');
+        doc.setFontSize(9.5);
+        doc.setTextColor(70,70,70);
+        doc.text('Perceived exertion scale, 1-10. Use on any cardio machine (treadmill preferred).', marginX, y, {maxWidth: pageW - marginX*2 - 10});
+        y += 20;
+
+        const tmasTable = [
+          [1,'5 (warm up)'],[2,'5 (warm up)'],[3,'6'],[4,'7'],[5,'8'],[6,'9'],[7,'6'],[8,'7'],
+          [9,'8'],[10,'9'],[11,'6'],[12,'7'],[13,'8'],[14,'9'],[15,'6'],[16,'7'],[17,'8'],[18,'9'],
+          [19,'10 (all out effort)'],[20,'5 (cool down)']
+        ];
+        const colStart = [marginX, marginX+260];
+        for (let i=0; i<tmasTable.length; i+=2){
+          ensureRoom(16);
+          doc.setFontSize(9.5);
+          doc.setTextColor(30,30,30);
+          const [min1, lvl1] = tmasTable[i];
+          doc.text('Min ' + min1 + ':  ' + lvl1, colStart[0], y);
+          if (tmasTable[i+1]){
+            const [min2, lvl2] = tmasTable[i+1];
+            doc.text('Min ' + min2 + ':  ' + lvl2, colStart[1], y);
+          }
+          y += 15;
+        }
+      }
+      return;
+    }
+
+    header(sess.label, 'Greyskull LP — projected numbers, log actual reps as you go');
+    const rows = sess.rows;
+
+      // table
+      const colX = [marginX, marginX+185, marginX+330, marginX+420];
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(9.5);
+      doc.setTextColor(120,100,60);
+      doc.text('EXERCISE', colX[0], y);
+      doc.text('PRESCRIPTION', colX[1], y);
+      doc.text('TARGET WEIGHT', colX[2], y);
+      doc.text('ACTUAL (LOG HERE)', colX[3], y);
+      y += 6;
+      doc.setDrawColor(200,190,170);
+      doc.line(marginX, y, pageW-marginX, y);
+      y += 16;
+
+      rows.forEach(r=>{
+        ensureRoom(46);
+        doc.setFont('helvetica','bold');
+        doc.setFontSize(10.5);
+        doc.setTextColor(20,20,20);
+        doc.text(r.ex, colX[0], y, {maxWidth:175});
+        doc.setFont('helvetica','normal');
+        doc.setFontSize(9.5);
+        doc.setTextColor(70,70,70);
+        doc.text(r.pres, colX[1], y, {maxWidth:135});
+        doc.text(String(r.weight), colX[2], y, {maxWidth:85});
+        doc.setDrawColor(210,210,210);
+        doc.line(colX[3], y+2, pageW-marginX, y+2);
+        y += 14;
+        if (r.note){
+          doc.setFontSize(8);
+          doc.setTextColor(150,110,60);
+          doc.text(r.note, colX[0], y, {maxWidth: pageW - marginX*2 - 10});
+          y += 12;
+        }
+        y += 12;
+        doc.setDrawColor(230,230,230);
+        doc.line(marginX, y-6, pageW-marginX, y-6);
+      });
+  });
+
+  if (shouldDownload){
+    doc.save('greyskull-lp-' + weeks + 'wk-program.pdf');
+    status.textContent = 'Downloaded — check your downloads folder.';
+  }
+}
+
+function generateExcel(){
+  const status = document.getElementById('status');
+  if (!window.XLSX){
+    status.textContent = 'Excel export library could not be loaded.';
+    return;
+  }
+  generatePDF(false);
+  const { sessions, dailyWork, conditioning, weeks } = generatedProgram;
+  const scheduleRows = [['Week', 'Day', 'Exercise', 'Prescription', 'Target Weight', 'Notes']];
+  sessions.forEach(sess=>{
+    if (sess.type === 'daily'){
+      dailyWork.items.forEach(item=>scheduleRows.push([sess.week, 'Daily Work + Conditioning', item, '', '', '']));
+      conditioning.plan.forEach(item=>scheduleRows.push([sess.week, 'Daily Work + Conditioning', item, '', '', '']));
+      if (conditioning.includeTMAS) scheduleRows.push([sess.week, 'Daily Work + Conditioning', '20-Minute Aerobic Solution', 'RPE ladder: 5-10', '', 'See PDF for minute-by-minute table.']);
+      return;
+    }
+    const day = sess.label.replace(/^Week \d+ · /, '');
+    sess.rows.forEach(row=>scheduleRows.push([sess.label.match(/^Week (\d+)/)[1], day, row.ex, row.pres, row.weight, row.note]));
+  });
+
+  const workbook = XLSX.utils.book_new();
+  const scheduleSheet = XLSX.utils.aoa_to_sheet(scheduleRows);
+  scheduleSheet['!cols'] = [{wch:8},{wch:34},{wch:34},{wch:22},{wch:18},{wch:58}];
+  XLSX.utils.book_append_sheet(workbook, scheduleSheet, 'Schedule');
+  const setupRows = [['Greyskull LP Program', weeks + '-week projection'], ['Daily Work', ...dailyWork.items], ['Conditioning', ...conditioning.plan]];
+  const setupSheet = XLSX.utils.aoa_to_sheet(setupRows);
+  setupSheet['!cols'] = [{wch:22},{wch:90}];
+  XLSX.utils.book_append_sheet(workbook, setupSheet, 'Program Details');
+  XLSX.writeFile(workbook, 'greyskull-lp-' + weeks + 'wk-program.xlsx');
+  status.textContent = 'Excel document downloaded — check your downloads folder.';
+}
+</script>
+</body>
+</html>
