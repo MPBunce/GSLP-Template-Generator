@@ -38,6 +38,21 @@
     letter-spacing:.14em;
     font-weight:700;
   }
+  .duration-control{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:12px;
+    color:var(--chalk-dim);
+    font-size:12px;
+  }
+  .duration-control select{
+    background:var(--panel);
+    border:1px solid var(--line);
+    color:var(--chalk);
+    padding:6px 8px;
+    font-size:12px;
+  }
   .masthead h1{
     font-size:40px;
     margin:6px 0 4px;
@@ -218,7 +233,14 @@
 
   <div class="masthead">
     <div class="kicker">CUSTOM PROGRAM BUILDER · BASED ON THE GREYSKULL LP, 3RD EDITION</div>
-    <h1 id="page-title">Build Your Four Weeks</h1>
+    <div class="duration-control">
+      <label for="num-weeks">Program duration</label>
+      <select id="num-weeks">
+        <option value="4">4 weeks</option>
+        <option value="6">6 weeks</option>
+      </select>
+    </div>
+    <h1 id="page-title">Build Your 4-Week Program</h1>
     <p id="page-description">Set your starting weights and increments, pick your accessory work, and generate a printable 4-week log — sourced from the book's own rep schemes and reset math, not generic defaults.</p>
   </div>
 
@@ -423,13 +445,6 @@
 
   <h2 class="section-title">SCHEDULE</h2>
   <div class="card">
-    <div class="small-field" style="margin-top:0;">
-      <span>Weeks to generate:</span>
-      <select id="num-weeks" style="width:92px;">
-        <option value="4">4 weeks</option>
-        <option value="6">6 weeks</option>
-      </select>
-    </div>
     <div class="weeks-note" id="schedule-note">3 sessions/week: Press+Squat, Bench+Deadlift, Press+Squat — then Bench and Press swap places the following week, exactly as laid out in the book. Weights are projected assuming you hit every prescribed rep — if you reset on a lift mid-plan, cross out the rest of that lift's projected numbers and restart from 90% by hand using the rule above.</div>
   </div>
 
@@ -535,8 +550,7 @@ const generateExcelButton = document.getElementById('generate-excel');
 
 function updateDurationLabels(){
   const weeks = weeksSelector.value;
-  const label = weeks === '6' ? 'Six' : 'Four';
-  pageTitle.textContent = 'Build Your ' + label + ' Weeks';
+  pageTitle.textContent = 'Build Your ' + weeks + '-Week Program';
   pageDescription.textContent = 'Set your starting weights and increments, pick your accessory work, and generate a printable ' + weeks + '-week log — sourced from the book\'s own rep schemes and reset math, not generic defaults.';
   generateButton.textContent = 'Generate ' + weeks + '-Week PDF';
   generateExcelButton.textContent = 'Generate ' + weeks + '-Week Excel';
@@ -733,7 +747,11 @@ function generatePDF(shouldDownload = true){
   }
 
   // ---- Build the session list for the requested number of weeks ----
-  const sessions = []; // each: {label, rows[]}
+  const sessions = []; // each: {label, type, rows[], week}
+
+  function addTrainingDay(label, week, rows){
+    sessions.push({ label, type: 'day', week, rows });
+  }
 
   if (progMode === '3day' || progMode === 'phraxture'){
     for (let w = 1; w <= weeks; w++){
@@ -764,9 +782,7 @@ function generatePDF(shouldDownload = true){
             upperAcc.forEach(a => r.push({ ex: a.name, pres: a.sets, weight: '—', note: '' }));
             return r;
           }},
-      ].forEach(s => sessions.push({ label: s.label, type: 'lift', rows: s.rows() }));
-
-      sessions.push({ label: 'Week ' + w + ' · Daily Work + Conditioning', type: 'daily', week: w });
+      ].forEach(s => addTrainingDay(s.label, w, s.rows()));
     }
   } else {
     // 4-day upper/lower
@@ -777,35 +793,59 @@ function generatePDF(shouldDownload = true){
       const day3Lift = pressOnDay1 ? benchRow : pressRow;
       const day3Name = pressOnDay1 ? 'Bench Press' : 'Press';
 
-      sessions.push({ label: 'Week ' + w + ' · Day 1 — Upper (' + day1Name + ')', type: 'lift', rows: (() => {
+      addTrainingDay('Week ' + w + ' · Day 1 — Upper (' + day1Name + ')', w, (() => {
           const r = [day1Lift()];
           upperAcc.forEach(a => r.push({ ex: a.name, pres: a.sets, weight: '—', note: '' }));
           return r;
-        })() });
+        })());
 
-      sessions.push({ label: 'Week ' + w + ' · Day 2 — Lower (Squat)', type: 'lift', rows: (() => {
+      addTrainingDay('Week ' + w + ' · Day 2 — Lower (Squat)', w, (() => {
           const r = [squatRow()];
           lowerAcc.forEach(a => r.push({ ex: a.name, pres: a.sets, weight: '—', note: '' }));
           return r;
-        })() });
+        })());
 
-      sessions.push({ label: 'Week ' + w + ' · Day 3 — Upper (' + day3Name + ')', type: 'lift', rows: (() => {
+      addTrainingDay('Week ' + w + ' · Day 3 — Upper (' + day3Name + ')', w, (() => {
           const r = [day3Lift()];
           upperAcc.forEach(a => r.push({ ex: a.name, pres: a.sets, weight: '—', note: '' }));
           return r;
-        })() });
+        })());
 
-      sessions.push({ label: 'Week ' + w + ' · Day 4 — Lower (Deadlift)', type: 'lift', rows: (() => {
+      addTrainingDay('Week ' + w + ' · Day 4 — Lower (Deadlift)', w, (() => {
           const r = [deadliftRow()];
           lowerAcc.forEach(a => r.push({ ex: a.name, pres: a.sets, weight: '—', note: '' }));
           return r;
-        })() });
-
-      sessions.push({ label: 'Week ' + w + ' · Daily Work + Conditioning', type: 'daily', week: w });
+        })());
     }
   }
 
   generatedProgram = { sessions, dailyWork, conditioning, weeks };
+
+  function sectionHeading(title){
+    ensureRoom(34);
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(11);
+    doc.setTextColor(184,85,46);
+    doc.text(title, marginX, y);
+    y += 18;
+  }
+
+  function renderPlanItems(items, emptyText){
+    if (items.length === 0){
+      doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(120,120,120);
+      doc.text(emptyText, marginX, y);
+      y += 20;
+      return;
+    }
+    items.forEach(line=>{
+      ensureRoom(20);
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(10.5);
+      doc.setTextColor(30,30,30);
+      doc.text('•  ' + line, marginX, y, {maxWidth: pageW - marginX*2 - 10});
+      y += 18;
+    });
+  }
 
   sessions.forEach((sess) => {
     newPage();
@@ -892,7 +932,8 @@ function generatePDF(shouldDownload = true){
       return;
     }
 
-    header(sess.label, 'Greyskull LP — projected numbers, log actual reps as you go');
+    header(sess.label, 'Greyskull LP — complete each section in order and log actual work as you go');
+    sectionHeading('LIFTING');
     const rows = sess.rows;
 
       // table
@@ -933,6 +974,43 @@ function generatePDF(shouldDownload = true){
         doc.setDrawColor(230,230,230);
         doc.line(marginX, y-6, pageW-marginX, y-6);
       });
+
+      y += 6;
+      sectionHeading('DAILY WORK');
+      renderPlanItems(dailyWork.items, 'No daily bodyweight work selected.');
+
+      y += 6;
+      sectionHeading('CARDIO / CONDITIONING');
+      renderPlanItems(conditioning.plan, 'No conditioning work selected.');
+
+      if (conditioning.includeTMAS){
+        y += 4;
+        sectionHeading('THE 20-MINUTE AEROBIC SOLUTION');
+        doc.setFont('helvetica','normal');
+        doc.setFontSize(9.5);
+        doc.setTextColor(70,70,70);
+        doc.text('Perceived exertion scale, 1-10. Use on any cardio machine (treadmill preferred).', marginX, y, {maxWidth: pageW - marginX*2 - 10});
+        y += 20;
+
+        const tmasTable = [
+          [1,'5 (warm up)'],[2,'5 (warm up)'],[3,'6'],[4,'7'],[5,'8'],[6,'9'],[7,'6'],[8,'7'],
+          [9,'8'],[10,'9'],[11,'6'],[12,'7'],[13,'8'],[14,'9'],[15,'6'],[16,'7'],[17,'8'],[18,'9'],
+          [19,'10 (all out effort)'],[20,'5 (cool down)']
+        ];
+        const colStart = [marginX, marginX+260];
+        for (let i=0; i<tmasTable.length; i+=2){
+          ensureRoom(16);
+          doc.setFontSize(9.5);
+          doc.setTextColor(30,30,30);
+          const [min1, lvl1] = tmasTable[i];
+          doc.text('Min ' + min1 + ':  ' + lvl1, colStart[0], y);
+          if (tmasTable[i+1]){
+            const [min2, lvl2] = tmasTable[i+1];
+            doc.text('Min ' + min2 + ':  ' + lvl2, colStart[1], y);
+          }
+          y += 15;
+        }
+      }
   });
 
   if (shouldDownload){
@@ -951,14 +1029,11 @@ function generateExcel(){
   const { sessions, dailyWork, conditioning, weeks } = generatedProgram;
   const scheduleRows = [['Week', 'Day', 'Exercise', 'Prescription', 'Target Weight', 'Notes']];
   sessions.forEach(sess=>{
-    if (sess.type === 'daily'){
-      dailyWork.items.forEach(item=>scheduleRows.push([sess.week, 'Daily Work + Conditioning', item, '', '', '']));
-      conditioning.plan.forEach(item=>scheduleRows.push([sess.week, 'Daily Work + Conditioning', item, '', '', '']));
-      if (conditioning.includeTMAS) scheduleRows.push([sess.week, 'Daily Work + Conditioning', '20-Minute Aerobic Solution', 'RPE ladder: 5-10', '', 'See PDF for minute-by-minute table.']);
-      return;
-    }
     const day = sess.label.replace(/^Week \d+ · /, '');
     sess.rows.forEach(row=>scheduleRows.push([sess.label.match(/^Week (\d+)/)[1], day, row.ex, row.pres, row.weight, row.note]));
+    dailyWork.items.forEach(item=>scheduleRows.push([sess.week, day, 'Daily Work: ' + item, '', '', 'Complete after lifting.']));
+    conditioning.plan.forEach(item=>scheduleRows.push([sess.week, day, 'Cardio: ' + item, '', '', 'Complete after daily work.']));
+    if (conditioning.includeTMAS) scheduleRows.push([sess.week, day, 'Cardio: 20-Minute Aerobic Solution', 'RPE ladder: 5-10', '', 'See PDF for minute-by-minute table.']);
   });
 
   const workbook = XLSX.utils.book_new();
