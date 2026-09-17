@@ -233,7 +233,13 @@
     margin-top:4px;
   }
   .weeks-note{color:var(--chalk-dim);font-size:12.5px;margin-top:6px;}
+  .day-variant-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px;}
+  .day-variant-grid label{display:flex;flex-direction:column;gap:5px;color:var(--chalk-dim);font-size:10px;letter-spacing:.06em;}
+  .day-variant-grid select{width:100%;}
+  .lower-extras-list{display:flex;flex-direction:column;margin-top:8px;}
+  #upper-lower-upper-panel{flex-direction:column;}
   .small-field{display:flex;align-items:center;gap:8px;font-size:13px;margin-top:12px;color:var(--chalk-dim);}
+  @media (max-width:560px){.day-variant-grid{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -313,34 +319,183 @@
     </div>
   </div>
 
-  <h2 class="section-title" id="additional-strength-title">ADDITIONAL STRENGTH MOVEMENTS (FULL-BODY DAYS)</h2>
-  <div class="weeks-note" id="additional-strength-note" style="margin-bottom:12px;">For the 3-day full-body setup, add lower-body and upper-body movements to the squat/press days. Deadlift days use the upper-body add-ons. Chin-ups, push-ups, and other pure-bodyweight work live in Section 2 below.</div>
+  <h2 class="section-title" id="additional-strength-title">FULL-BODY DAY ACCESSORIES</h2>
+  <div class="weeks-note" id="additional-strength-note" style="margin-bottom:12px;">Choose accessories separately for each full-body training day. Chin-ups, push-ups, and other pure-bodyweight work live in Section 2 below.</div>
   <div class="grid2">
     <div class="card">
-      <h3 id="lower-addons-heading">Full-Body Day: Lower Add-ons</h3>
-      <div class="accessory-group">
-        <h4>FROM THE BOOK</h4>
-        <div class="acc-item book"><input type="checkbox" data-day="lower" data-name="Direct Abdominal Work" data-sets="2 x 10-12" checked><div>Direct Abdominal Work<div class="meta">2 sets of 10-12 reps</div></div></div>
-        <div class="acc-item book"><input type="checkbox" data-day="lower" data-name="Direct Calf Work" data-sets="1 x 15-20 (slow)" checked><div>Direct Calf Work<div class="meta">1 set, 15-20 slow reps</div></div></div>
+      <h3 id="lower-addons-heading">Day A — Squat + Press</h3>
+      <div id="full-body-day-a-panel" class="accessory-group">
+        <h4>SELECT DAY A ACCESSORIES</h4>
+        <div class="day-variant-grid">
+          <label>LOWER <select id="full-body-day-a-lower">
+            <option>Single-Leg RDL</option>
+            <option>Bulgarian Split Squat</option>
+            <option>Reverse Lunge</option>
+            <option>Step-up</option>
+          </select></label>
+        </div>
+        <h4>PULL</h4>
+        <div class="lower-extras-list">
+          <label class="acc-item book"><input type="checkbox" data-full-body-extra="a" data-name="Barbell Row" data-sets="2 x 6-8"><span>Barbell Row</span></label>
+          <label class="acc-item book"><input type="checkbox" data-full-body-extra="a" data-name="Chest-Supported Row" data-sets="2 x 6-8"><span>Chest-Supported Row</span></label>
+          <label class="acc-item book"><input type="checkbox" data-full-body-extra="a" data-name="One-Arm Dumbbell Row" data-sets="2 x 8-12/side"><span>One-Arm Dumbbell Row</span></label>
+          <label class="acc-item book"><input type="checkbox" data-full-body-extra="a" data-name="Pull-over" data-sets="2 x 8-10"><span>Pull-over</span></label>
+        </div>
+        <h4>PUSH</h4>
+        <div class="lower-extras-list">
+          <label class="acc-item book"><input type="checkbox" data-full-body-extra="a" data-name="Incline Press" data-sets="2 x 6-8"><span>Incline Press</span></label>
+          <label class="acc-item book"><input type="checkbox" data-full-body-extra="a" data-name="Close-Grip Bench Press" data-sets="2 x 6-8"><span>Close-Grip Bench Press</span></label>
+          <label class="acc-item book"><input type="checkbox" data-full-body-extra="a" data-name="Dips (weighted)" data-sets="2 x 6-8"><span>Dips (weighted)</span></label>
+          <label class="acc-item book"><input type="checkbox" data-full-body-extra="a" data-name="Dumbbell Bench Press" data-sets="2 x 8-12"><span>Dumbbell Bench Press</span></label>
+        </div>
+        <h4>SHOULDERS</h4>
+        <div class="lower-extras-list">
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="a" data-name="Dumbbell Lateral Raise" data-sets="3 x 12-15"><span>Dumbbell Lateral Raise</span></label>
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="a" data-name="Rear Delt Fly" data-sets="3 x 12-15"><span>Rear Delt Fly</span></label>
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="a" data-name="Face Pull" data-sets="3 x 12-15"><span>Face Pull</span></label>
+        </div>
+        <h4>ARMS</h4>
+        <div class="lower-extras-list">
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="a" data-name="Barbell Curl" data-sets="3 x 10-12"><span>Barbell Curl</span></label>
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="a" data-name="Hammer Curl" data-sets="3 x 10-12"><span>Hammer Curl</span></label>
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="a" data-name="Triceps Pressdown" data-sets="3 x 10-12"><span>Triceps Pressdown</span></label>
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="a" data-name="Overhead Triceps Extension" data-sets="3 x 10-12"><span>Overhead Triceps Extension</span></label>
+        </div>
+        <h4>LOWER</h4>
+        <div class="lower-extras-list">
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="a" data-name="Bulgarian Split Squat" data-sets="3 x 8-12/leg"><span>Bulgarian Split Squat</span></label>
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="a" data-name="Single-Leg RDL" data-sets="3 x 8-12/leg"><span>Single-Leg RDL</span></label>
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="a" data-name="Leg Press" data-sets="3 x 12"><span>Leg Press</span></label>
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="a" data-name="Leg Curl" data-sets="3 x 12"><span>Leg Curl</span></label>
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="a" data-name="Hip Thrust" data-sets="3 x 12"><span>Hip Thrust</span></label>
+        </div>
+        <h4>ABS</h4>
+        <div class="lower-extras-list">
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="a" data-name="Dead Bug" data-sets="3 x 12/side"><span>Dead Bug</span></label>
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="a" data-name="Plank" data-sets="3 x 30-60 sec"><span>Plank</span></label>
+        </div>
+        <h4>CALVES</h4>
+        <div class="lower-extras-list">
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="a" data-name="Standing Calf Raise" data-sets="3 x 12"><span>Standing Calf Raise</span></label>
+        </div>
       </div>
-      <div class="accessory-group">
-        <h4>NOT IN THE ORIGINAL TEXT — COMMON ADDITIONS</h4>
-        <div class="acc-item custom"><input type="checkbox" data-day="lower" data-name="Single-Leg RDL" data-sets="3 x 8-12/leg (double progression)"><div>Single-Leg RDL<div class="meta">3 sets, 8-12/leg — add reps, then weight</div></div></div>
-        <div class="acc-item custom"><input type="checkbox" data-day="lower" data-name="Split Squat" data-sets="3 x 8-12/leg (double progression)"><div>Split Squat<div class="meta">3 sets, 8-12/leg — add reps, then weight</div></div></div>
+      <div id="upper-lower-lower-panel" class="accessory-group" style="display:none;">
+        <div class="weeks-note" style="margin-bottom:10px;">Pick one lower accessory for each lower day.</div>
+        <div class="day-variant-grid">
+          <label>LOWER A — SQUAT <select id="lower-a-variant"><option>Single-Leg RDL</option><option>Bulgarian Split Squat</option><option>Reverse Lunge</option><option>Step-up</option></select></label>
+          <label>LOWER B — DEADLIFT <select id="lower-b-variant"><option>Split Squat</option><option>Single-Leg RDL</option><option>Reverse Lunge</option><option>Step-up</option></select></label>
+        </div>
+        <div class="accessory-group">
+          <h4>OPTIONAL EXTRAS — ADDED TO BOTH LOWER DAYS</h4>
+          <div class="lower-extras-list">
+            <label class="acc-item custom"><input type="checkbox" data-lower-extra data-name="Bulgarian Split Squat" data-sets="3 x 8-12/leg"><span>Bulgarian Split Squat</span></label>
+            <label class="acc-item custom"><input type="checkbox" data-lower-extra data-name="Single-Leg RDL" data-sets="3 x 8-12/leg"><span>Single-Leg RDL</span></label>
+            <label class="acc-item custom"><input type="checkbox" data-lower-extra data-name="Leg Press" data-sets="3 x 12"><span>Leg Press</span></label>
+            <label class="acc-item custom"><input type="checkbox" data-lower-extra data-name="Standing Calf Raise" data-sets="3 x 12"><span>Standing Calf Raise</span></label>
+            <label class="acc-item custom"><input type="checkbox" data-lower-extra data-name="Leg Curl" data-sets="3 x 12"><span>Leg Curl</span></label>
+            <label class="acc-item custom"><input type="checkbox" data-lower-extra data-name="Hip Thrust" data-sets="3 x 12"><span>Hip Thrust</span></label>
+            <label class="acc-item custom"><input type="checkbox" data-lower-extra data-name="Dead Bug" data-sets="3 x 12/side"><span>Dead Bug</span></label>
+            <label class="acc-item custom"><input type="checkbox" data-lower-extra data-name="Plank" data-sets="3 x 30-60 sec"><span>Plank</span></label>
+          </div>
+        </div>
       </div>
     </div>
     <div class="card">
-      <h3 id="upper-addons-heading">Full-Body Day: Upper Add-ons</h3>
-      <div class="accessory-group">
-        <h4>FROM THE BOOK</h4>
-        <div class="acc-item book"><input type="checkbox" data-day="upper" data-name="Row Variant" data-sets="2 x 6-8" checked><div>Row Variant<div class="meta">2 sets of 6-8 reps</div></div></div>
-        <div class="acc-item book"><input type="checkbox" data-day="upper" data-name="Curl Variant" data-sets="2 x 10-12"><div>Curl Variant<div class="meta">2 sets of 10-12 reps</div></div></div>
-        <div class="acc-item book"><input type="checkbox" data-day="upper" data-name="Neck Extension" data-sets="4 x 25+"><div>Neck Extension (harness)<div class="meta">4 sets of 25+ reps</div></div></div>
-        <div class="acc-item book"><input type="checkbox" data-day="upper" data-name="Pull-over" data-sets="2 x 8-10"><div>Pull-over<div class="meta">2 sets of 8-10 reps</div></div></div>
-        <div class="acc-item book"><input type="checkbox" data-day="upper" data-name="Dips (weighted)" data-sets="2 x 6-8 (if weighted)"><div>Dips (weighted)<div class="meta">2 sets of 6-8 reps — only if loading them; bodyweight dips live in Section 2</div></div></div>
-        <div class="acc-item book"><input type="checkbox" data-day="upper" data-name="Weighted Chin/Pull-up Variant" data-sets="2 x 6-8 (if weighted)"><div>Weighted Chin/Pull-up Variant<div class="meta">2 sets of 6-8 reps — an extra weighted variant on top of Section 2's daily chins</div></div></div>
-        <div class="acc-item book"><input type="checkbox" data-day="upper" data-name="Forearm Work" data-sets="2 x 12-20"><div>Forearm Work<div class="meta">2 sets of 12-20 reps</div></div></div>
-        <div class="acc-item book"><input type="checkbox" data-day="upper" data-name="Cable Arm Movement" data-sets="2-3 x 10-12" checked><div>Cable Arm Movement (triceps/delts)<div class="meta">10-12 rep range</div></div></div>
+      <h3 id="upper-addons-heading">Day B — Deadlift + Bench</h3>
+      <div id="full-body-day-b-panel" class="accessory-group">
+        <h4>SELECT DAY B ACCESSORIES</h4>
+        <div class="day-variant-grid">
+          <label>LOWER <select id="full-body-day-b-lower"><option>Split Squat</option><option>Single-Leg RDL</option><option>Reverse Lunge</option><option>Step-up</option></select></label>
+        </div>
+        <h4>PULL</h4>
+        <div class="lower-extras-list">
+          <label class="acc-item book"><input type="checkbox" data-full-body-extra="b" data-name="Barbell Row" data-sets="2 x 6-8"><span>Barbell Row</span></label>
+          <label class="acc-item book"><input type="checkbox" data-full-body-extra="b" data-name="Chest-Supported Row" data-sets="2 x 6-8"><span>Chest-Supported Row</span></label>
+          <label class="acc-item book"><input type="checkbox" data-full-body-extra="b" data-name="One-Arm Dumbbell Row" data-sets="2 x 8-12/side"><span>One-Arm Dumbbell Row</span></label>
+          <label class="acc-item book"><input type="checkbox" data-full-body-extra="b" data-name="Pull-over" data-sets="2 x 8-10"><span>Pull-over</span></label>
+        </div>
+        <h4>PUSH</h4>
+        <div class="lower-extras-list">
+          <label class="acc-item book"><input type="checkbox" data-full-body-extra="b" data-name="Incline Press" data-sets="2 x 6-8"><span>Incline Press</span></label>
+          <label class="acc-item book"><input type="checkbox" data-full-body-extra="b" data-name="Close-Grip Bench Press" data-sets="2 x 6-8"><span>Close-Grip Bench Press</span></label>
+          <label class="acc-item book"><input type="checkbox" data-full-body-extra="b" data-name="Dips (weighted)" data-sets="2 x 6-8"><span>Dips (weighted)</span></label>
+          <label class="acc-item book"><input type="checkbox" data-full-body-extra="b" data-name="Dumbbell Bench Press" data-sets="2 x 8-12"><span>Dumbbell Bench Press</span></label>
+        </div>
+        <h4>SHOULDERS</h4>
+        <div class="lower-extras-list">
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="b" data-name="Dumbbell Lateral Raise" data-sets="3 x 12-15"><span>Dumbbell Lateral Raise</span></label>
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="b" data-name="Rear Delt Fly" data-sets="3 x 12-15"><span>Rear Delt Fly</span></label>
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="b" data-name="Face Pull" data-sets="3 x 12-15"><span>Face Pull</span></label>
+        </div>
+        <h4>ARMS</h4>
+        <div class="lower-extras-list">
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="b" data-name="Barbell Curl" data-sets="3 x 10-12"><span>Barbell Curl</span></label>
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="b" data-name="Hammer Curl" data-sets="3 x 10-12"><span>Hammer Curl</span></label>
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="b" data-name="Triceps Pressdown" data-sets="3 x 10-12"><span>Triceps Pressdown</span></label>
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="b" data-name="Overhead Triceps Extension" data-sets="3 x 10-12"><span>Overhead Triceps Extension</span></label>
+        </div>
+        <h4>LOWER</h4>
+        <div class="lower-extras-list">
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="b" data-name="Bulgarian Split Squat" data-sets="3 x 8-12/leg"><span>Bulgarian Split Squat</span></label>
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="b" data-name="Single-Leg RDL" data-sets="3 x 8-12/leg"><span>Single-Leg RDL</span></label>
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="b" data-name="Leg Press" data-sets="3 x 12"><span>Leg Press</span></label>
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="b" data-name="Leg Curl" data-sets="3 x 12"><span>Leg Curl</span></label>
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="b" data-name="Hip Thrust" data-sets="3 x 12"><span>Hip Thrust</span></label>
+        </div>
+        <h4>ABS</h4>
+        <div class="lower-extras-list">
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="b" data-name="Dead Bug" data-sets="3 x 12/side"><span>Dead Bug</span></label>
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="b" data-name="Plank" data-sets="3 x 30-60 sec"><span>Plank</span></label>
+        </div>
+        <h4>CALVES</h4>
+        <div class="lower-extras-list">
+          <label class="acc-item custom"><input type="checkbox" data-full-body-extra="b" data-name="Standing Calf Raise" data-sets="3 x 12"><span>Standing Calf Raise</span></label>
+        </div>
+      </div>
+      <div id="upper-lower-upper-panel" class="accessory-group" style="display:none;">
+        <h4>UPPER DAY FOCUS (PICK ONE — APPLIES TO BOTH UPPER DAYS)</h4>
+        <div class="mode-toggle" id="upper-focus" style="gap:10px;">
+          <button data-mode="shoulders" style="padding:10px 16px;font-size:13px;">Shoulders</button>
+          <button data-mode="chestback" class="active" style="padding:10px 16px;font-size:13px;">Chest &amp; Back</button>
+          <button data-mode="arms" style="padding:10px 16px;font-size:13px;">Arms</button>
+        </div>
+        <div class="weeks-note" id="upper-focus-note" style="margin-top:10px;"></div>
+        <div class="day-variant-grid" id="chestback-choices">
+          <label>UPPER A PULL <select id="upper-a-pull">
+            <option>Barbell Row</option>
+            <option>Chest-Supported Row</option>
+            <option>One-Arm Dumbbell Row</option>
+            <option>Pull-over</option>
+          </select></label>
+          <label>UPPER A PUSH <select id="upper-a-push">
+            <option>Incline Press</option>
+            <option>Close-Grip Bench Press</option>
+            <option>Dips (weighted)</option>
+          </select></label>
+          <label>UPPER B PULL <select id="upper-b-pull">
+            <option>Barbell Row</option>
+            <option>Chest-Supported Row</option>
+            <option>One-Arm Dumbbell Row</option>
+            <option>Pull-over</option>
+          </select></label>
+          <label>UPPER B PUSH <select id="upper-b-push">
+            <option>Incline Press</option>
+            <option>Close-Grip Bench Press</option>
+            <option>Dips (weighted)</option>
+          </select></label>
+        </div>
+        <div class="day-variant-grid" id="shoulders-choices" style="display:none;">
+          <label>UPPER A LATERAL DELT <select id="upper-a-lateral"><option>Dumbbell Lateral Raise</option><option>Cable Lateral Raise</option><option>Machine Lateral Raise</option></select></label>
+          <label>UPPER A REAR DELT <select id="upper-a-rear-delt"><option>Rear Delt Fly</option><option>Face Pull</option><option>Reverse Pec Deck</option></select></label>
+          <label>UPPER B LATERAL DELT <select id="upper-b-lateral"><option>Dumbbell Lateral Raise</option><option>Cable Lateral Raise</option><option>Machine Lateral Raise</option></select></label>
+          <label>UPPER B REAR DELT <select id="upper-b-rear-delt"><option>Rear Delt Fly</option><option>Face Pull</option><option>Reverse Pec Deck</option></select></label>
+        </div>
+        <div class="day-variant-grid" id="arms-choices" style="display:none;">
+          <label>UPPER A BICEPS <select id="upper-a-biceps"><option>Barbell Curl</option><option>Incline Dumbbell Curl</option><option>Hammer Curl</option></select></label>
+          <label>UPPER A TRICEPS <select id="upper-a-triceps"><option>Triceps Pressdown</option><option>Overhead Triceps Extension</option><option>Skull Crusher</option></select></label>
+          <label>UPPER B BICEPS <select id="upper-b-biceps"><option>Barbell Curl</option><option>Incline Dumbbell Curl</option><option>Hammer Curl</option></select></label>
+          <label>UPPER B TRICEPS <select id="upper-b-triceps"><option>Triceps Pressdown</option><option>Overhead Triceps Extension</option><option>Skull Crusher</option></select></label>
+        </div>
       </div>
     </div>
   </div>
@@ -374,19 +529,19 @@
   <h2 class="section-title">MOVEMENTS</h2>
   <div class="card">
     <div class="acc-item book"><input type="checkbox" data-daily="pullups" checked><div>Chin-ups / Pull-ups<div class="meta">Book's primary daily movement</div></div>
-      <div class="num-field daily-reps"><span data-daily-rep-label>REPS / SET × 4</span><input type="number" data-daily-reps="pullups" value="10" min="1" step="1"></div>
+      <div class="num-field daily-reps"><span data-daily-rep-label>REPS / SET × 4</span><input type="number" data-daily-reps="pullups" value="4" min="1" step="1"></div>
     </div>
     <div class="acc-item book"><input type="checkbox" data-daily="pushups" checked><div>Push-ups<div class="meta">Commonly paired with chins in the book's own sample weeks</div></div>
-      <div class="num-field daily-reps"><span data-daily-rep-label>REPS / SET × 4</span><input type="number" data-daily-reps="pushups" value="70" min="1" step="1"></div>
+      <div class="num-field daily-reps"><span data-daily-rep-label>REPS / SET × 4</span><input type="number" data-daily-reps="pushups" value="10" min="1" step="1"></div>
     </div>
     <div class="acc-item book"><input type="checkbox" data-daily="dips"><div>Dips<div class="meta">Same three methods apply</div></div>
-      <div class="num-field daily-reps"><span data-daily-rep-label>REPS / SET × 4</span><input type="number" data-daily-reps="dips" value="30" min="1" step="1"></div>
+      <div class="num-field daily-reps"><span data-daily-rep-label>REPS / SET × 4</span><input type="number" data-daily-reps="dips" value="5" min="1" step="1"></div>
     </div>
     <div class="acc-item book"><input type="checkbox" data-daily="squats"><div>Bodyweight Squats<div class="meta">Daily squat pattern work</div></div>
-      <div class="num-field daily-reps"><span data-daily-rep-label>REPS / SET × 4</span><input type="number" data-daily-reps="squats" value="30" min="1" step="1"></div>
+      <div class="num-field daily-reps"><span data-daily-rep-label>REPS / SET × 4</span><input type="number" data-daily-reps="squats" value="10" min="1" step="1"></div>
     </div>
     <div class="acc-item book"><input type="checkbox" data-daily="situps"><div>Sit-ups<div class="meta">From the book's Total Work Method example</div></div>
-      <div class="num-field daily-reps"><span data-daily-rep-label>REPS / SET × 4</span><input type="number" data-daily-reps="situps" value="80" min="1" step="1"></div>
+      <div class="num-field daily-reps"><span data-daily-rep-label>REPS / SET × 4</span><input type="number" data-daily-reps="situps" value="10" min="1" step="1"></div>
     </div>
     <div class="weeks-note" style="margin-top:10px;">Total Work Method: pick a challenging-but-doable daily rep total per movement (the book's own example: 70 push-ups, 80 sit-ups, 30 burpees, 10 dead-hang chins) and chip away at it across the day, staying shy of failure on every set. Increase the total once it stops feeling hard.</div>
   </div>
@@ -432,15 +587,24 @@
         <input type="checkbox" id="tmas-enable">
         <label for="tmas-enable">Include this protocol (borrowed from Bill Phillips)</label>
       </div>
-      <div class="small-field">
-        <input type="checkbox" id="aerobic-burpees">
-        <label for="aerobic-burpees">Add Burpee Challenge (VC1)</label>
-        <input type="number" id="aerobic-burpees-reps" value="30" min="1" step="5" style="width:62px;">
-        <span>reps</span>
-        <input type="number" id="aerobic-burpees-days" value="6" min="1" max="7" step="1" style="width:52px;">
-        <span>days/week</span>
+      <div class="weeks-note">A 20-minute RPE-ladder interval session on any cardio machine — effort climbs 5→9 in waves, capped with an all-out minute 19.</div>
+    </div>
+    <div class="card">
+      <h3>Villain Challenge 1</h3>
+      <div class="small-field" style="margin-top:0;">
+        <input type="checkbox" id="vc1-enable">
+        <label for="vc1-enable">Train toward 100 burpees in 5 minutes</label>
       </div>
-      <div class="weeks-note">A 20-minute RPE-ladder interval session on any cardio machine — effort climbs 5→9 in waves, capped with an all-out minute 19. The Burpee Challenge is recommended six days per week, starting around 3 sets of 10 and progressing toward 100 reps in 5 minutes.</div>
+      <div class="lift-row">
+        <label class="name">Current progression</label>
+        <div class="num-field"><span>STAGE</span><select id="vc1-stage">
+          <option value="start">3 x 10 in 30 sec/set</option>
+          <option value="three-sets">3 sets, build to 30 reps in 90 sec</option>
+          <option value="two-sets">2 x 50 in 2:30/set</option>
+          <option value="single-set">1 x 100 in 5:00</option>
+        </select></div>
+      </div>
+      <div class="weeks-note">Train six days per week. Start with 3 sets of 10 in 30 seconds; add 1-2 reps only after making the target time. Add three seconds for each added rep and reduce rest toward one minute. At 3 x 30 in 90 seconds, move to 2 sets; at 2 x 50 in 2:30, move to a single 100-rep set.</div>
     </div>
     <div class="card">
       <h3>Ruck Marching (Bonus Layer)</h3>
@@ -546,16 +710,62 @@ function updateScheduleNote(mode = getProgramMode()){
   document.getElementById(id).addEventListener('change', ()=>updateScheduleNote());
 });
 
+const fullBodyDayAPanel = document.getElementById('full-body-day-a-panel');
+const fullBodyDayBPanel = document.getElementById('full-body-day-b-panel');
+const upperLowerLowerPanel = document.getElementById('upper-lower-lower-panel');
+const upperLowerUpperPanel = document.getElementById('upper-lower-upper-panel');
+const chestBackChoices = document.getElementById('chestback-choices');
+const shouldersChoices = document.getElementById('shoulders-choices');
+const armsChoices = document.getElementById('arms-choices');
+const upperFocusNote = document.getElementById('upper-focus-note');
+const upperFocusNotes = {
+  shoulders: '4 sets Lateral Raise + 4 sets Rear Delt Fly, then 3 sets Barbell Curl + 3 sets Triceps Pressdown.',
+  chestback: '4 sets Barbell Row (pull) + 4 sets Incline Press (push), then 3 sets Barbell Curl + 3 sets Triceps Pressdown.',
+  arms: '4 sets Barbell Curl + 4 sets Triceps Pressdown, then 3 sets Lateral Raise + 3 sets Rear Delt Fly.'
+};
+
 function updateAdditionalStrengthLabels(mode){
   const isUpperLower = mode === '4day';
+  const isFullBody = mode === '3day' || mode === 'phraxture';
   additionalStrengthTitle.textContent = isUpperLower
     ? 'ADDITIONAL STRENGTH MOVEMENTS (TIED TO UPPER/LOWER DAYS)'
-    : 'ADDITIONAL STRENGTH MOVEMENTS (FULL-BODY DAYS)';
+    : 'FULL-BODY DAY ACCESSORIES';
   additionalStrengthNote.textContent = isUpperLower
-    ? 'For the 4-day Upper/Lower setup, upper add-ons appear on upper days and lower add-ons appear on lower days. Chin-ups, push-ups, and other pure-bodyweight work live in Section 2 below.'
-    : 'For the 3-day full-body setup, add lower-body and upper-body movements to the squat/press days. Deadlift days use the upper-body add-ons. Chin-ups, push-ups, and other pure-bodyweight work live in Section 2 below.';
-  lowerAddonsHeading.textContent = isUpperLower ? 'Lower Day Add-ons' : 'Full-Body Day: Lower Add-ons';
-  upperAddonsHeading.textContent = isUpperLower ? 'Upper Day Add-ons' : 'Full-Body Day: Upper Add-ons';
+    ? 'Choose the lower accessory for each lower day, then select an upper focus and its exercise choices.'
+    : 'Choose accessories separately for Day A (Squat + Press) and Day B (Deadlift + Bench).';
+  lowerAddonsHeading.textContent = isUpperLower ? 'Lower Day Accessories' : 'Day A — Squat + Press';
+  upperAddonsHeading.textContent = isUpperLower ? 'Upper Day Accessories' : 'Day B — Deadlift + Bench';
+  fullBodyDayAPanel.style.display = isFullBody ? '' : 'none';
+  fullBodyDayBPanel.style.display = isFullBody ? '' : 'none';
+  upperLowerLowerPanel.style.display = isUpperLower ? '' : 'none';
+  upperLowerUpperPanel.style.display = isUpperLower ? 'flex' : 'none';
+}
+
+function updateUpperFocusChoices(focus){
+  chestBackChoices.style.display = focus === 'chestback' ? '' : 'none';
+  shouldersChoices.style.display = focus === 'chestback' ? 'none' : '';
+  armsChoices.style.display = '';
+  chestBackChoices.style.order = '1';
+  shouldersChoices.style.order = focus === 'shoulders' ? '1' : '2';
+  armsChoices.style.order = focus === 'arms' ? '1' : '2';
+}
+
+document.querySelectorAll('#upper-focus button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('#upper-focus button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    upperFocusNote.textContent = upperFocusNotes[btn.dataset.mode];
+    updateUpperFocusChoices(btn.dataset.mode);
+  });
+});
+function getUpperFocus(){
+  return document.querySelector('#upper-focus button.active').dataset.mode;
+}
+upperFocusNote.textContent = upperFocusNotes[getUpperFocus()];
+updateUpperFocusChoices(getUpperFocus());
+
+function getDayVariant(id){
+  return document.getElementById(id).value;
 }
 
 document.querySelectorAll('#program-mode button').forEach(btn=>{
@@ -631,6 +841,17 @@ function getDailyWork(){
   return { method, items };
 }
 
+function getVC1Prescription(){
+  const stage = document.getElementById('vc1-stage').value;
+  const prescriptions = {
+    start: '3 x 10 burpees in 30 sec/set; rest as needed, working toward 1 minute between sets.',
+    'three-sets': '3 sets of burpees, building toward 30 reps in 90 sec/set with 1 minute rest.',
+    'two-sets': '2 x 50 burpees in 2:30/set with 1 minute rest.',
+    'single-set': '1 x 100 burpees in 5:00.'
+  };
+  return prescriptions[stage];
+}
+
 function getConditioningPlan(){
   const plan = [];
   if (document.getElementById('hic-enable').checked){
@@ -647,10 +868,8 @@ function getConditioningPlan(){
     const m = document.getElementById('ruck-minutes').value;
     plan.push('Ruck March (bonus layer) — ' + w + ' lb pack, ~' + m + ' minutes, several days/week.');
   }
-  if (document.getElementById('aerobic-burpees').checked){
-    const reps = document.getElementById('aerobic-burpees-reps').value;
-    const days = document.getElementById('aerobic-burpees-days').value;
-    plan.push('Burpee Challenge (Villain Challenge 1) — ' + reps + ' reps, ' + days + ' day(s)/week, progressing toward 100 reps in 5 minutes.');
+  if (document.getElementById('vc1-enable').checked){
+    plan.push('Villain Challenge 1 — six days/week. ' + getVC1Prescription());
   }
   const includeTMAS = document.getElementById('tmas-enable').checked;
   return { plan, includeTMAS };
@@ -674,9 +893,11 @@ function generatePDF(shouldDownload = true){
   const pressStart = parseFloat(document.getElementById('press-start').value);
   const pressInc = parseFloat(document.getElementById('press-inc').value);
 
-  const lowerAcc = [...document.querySelectorAll('.acc-item input[data-day="lower"]:checked')]
+  const lowerExtras = [...document.querySelectorAll('input[data-lower-extra]:checked')]
       .map(el=>({name:el.dataset.name, sets:el.dataset.sets}));
-  const upperAcc = [...document.querySelectorAll('.acc-item input[data-day="upper"]:checked')]
+    const fullBodyDayAExtras = [...document.querySelectorAll('input[data-full-body-extra="a"]:checked')]
+      .map(el=>({name:el.dataset.name, sets:el.dataset.sets}));
+    const fullBodyDayBExtras = [...document.querySelectorAll('input[data-full-body-extra="b"]:checked')]
       .map(el=>({name:el.dataset.name, sets:el.dataset.sets}));
 
   const dailyWork = getDailyWork();
@@ -794,6 +1015,69 @@ function generatePDF(shouldDownload = true){
     return { ex: name, pres: '2x5, 1x5+', weight: '—', note: 'Add weight next session if you complete 5+ reps on the third set.' };
   }
 
+  function accRow(name, pres){
+    return { ex: name, pres: pres, weight: '—', note: '' };
+  }
+
+  function lowerAccessoryPrescription(name){
+    const unilateral = ['Single-Leg RDL', 'Bulgarian Split Squat', 'Split Squat', 'Reverse Lunge', 'Step-up'];
+    return unilateral.includes(name) ? '3 x 8-12/leg (double progression)' : '3 x 12';
+  }
+
+  function mandatoryLowerRow(isSquatDay){
+    const variant = isSquatDay ? getDayVariant('lower-a-variant') : getDayVariant('lower-b-variant');
+    return accRow(variant, lowerAccessoryPrescription(variant));
+  }
+
+  function upperFocusRows(day){
+    const focus = getUpperFocus();
+    const pull = getDayVariant(day === 'A' ? 'upper-a-pull' : 'upper-b-pull');
+    const push = getDayVariant(day === 'A' ? 'upper-a-push' : 'upper-b-push');
+    const lateral = getDayVariant(day === 'A' ? 'upper-a-lateral' : 'upper-b-lateral');
+    const rearDelt = getDayVariant(day === 'A' ? 'upper-a-rear-delt' : 'upper-b-rear-delt');
+    const biceps = getDayVariant(day === 'A' ? 'upper-a-biceps' : 'upper-b-biceps');
+    const triceps = getDayVariant(day === 'A' ? 'upper-a-triceps' : 'upper-b-triceps');
+    if (focus === 'shoulders'){
+      return [
+        accRow(lateral, '4 x 12-15'),
+        accRow(rearDelt, '4 x 12-15'),
+        accRow(biceps, '3 x 10-12'),
+        accRow(triceps, '3 x 10-12')
+      ];
+    }
+    if (focus === 'arms'){
+      return [
+        accRow(biceps, '4 x 10-12'),
+        accRow(triceps, '4 x 10-12'),
+        accRow(lateral, '3 x 12-15'),
+        accRow(rearDelt, '3 x 12-15')
+      ];
+    }
+    return [
+      accRow(pull, '4 x 6-10'),
+      accRow(push, '4 x 6-10'),
+      accRow('Barbell Curl', '3 x 10-12'),
+      accRow('Triceps Pressdown', '3 x 10-12')
+    ];
+  }
+
+  function fullBodyVariantRows(day){
+    const lower = getDayVariant(day === 'A' ? 'full-body-day-a-lower' : 'full-body-day-b-lower');
+    return [
+      accRow(lower, lowerAccessoryPrescription(lower))
+    ];
+  }
+
+  function fullBodyExtras(day){
+    return day === 'A' ? fullBodyDayAExtras : fullBodyDayBExtras;
+  }
+
+  function appendUniqueRows(target, rows){
+    rows.forEach(row=>{
+      if (!target.some(existing => existing.ex === row.ex)) target.push(row);
+    });
+  }
+
   function conditioningForDay(dayIndex){
     const plan = [];
     if (document.getElementById('hic-enable').checked && dayIndex < Number(document.getElementById('hic-count').value)){
@@ -808,9 +1092,8 @@ function generatePDF(shouldDownload = true){
       const minutes = document.getElementById('ruck-minutes').value;
       plan.push('Ruck March — ' + weight + ' lb pack, ~' + minutes + ' minutes.');
     }
-    if (document.getElementById('aerobic-burpees').checked && dayIndex < Number(document.getElementById('aerobic-burpees-days').value)){
-      const reps = document.getElementById('aerobic-burpees-reps').value;
-      plan.push('Burpee Challenge — ' + reps + ' reps, progressing toward 100 reps in 5 minutes.');
+    if (document.getElementById('vc1-enable').checked && dayIndex < 6){
+      plan.push('Villain Challenge 1 — ' + getVC1Prescription());
     }
     return plan;
   }
@@ -818,8 +1101,8 @@ function generatePDF(shouldDownload = true){
   // ---- Build seven day records for each requested week ----
   const sessions = []; // each: {label, type, rows[], week, day, conditioning}
 
-  function addTrainingDay(label, week, day, rows){
-    sessions.push({ label, type: 'day', week, day, rows, conditioning: conditioningForDay(day) });
+  function addTrainingDay(label, week, day, rows, conditioningOverride = null){
+    sessions.push({ label, type: 'day', week, day, rows, conditioning: conditioningOverride || conditioningForDay(day) });
   }
 
   if (progMode === '3day' || progMode === 'phraxture'){
@@ -834,21 +1117,22 @@ function generatePDF(shouldDownload = true){
         { label: 'Day 1 — ' + outerName + ' + Squat', rows: () => {
             const r = [outerLift(), squatRow()];
             if (progMode === 'phraxture') r.push(backMainRow('Weighted Pull-ups'));
-            lowerAcc.forEach(a => r.push({ ex: a.name, pres: a.sets, weight: '—', note: '' }));
-            upperAcc.forEach(a => r.push({ ex: a.name, pres: a.sets, weight: '—', note: '' }));
+            appendUniqueRows(r, fullBodyVariantRows('A'));
+            appendUniqueRows(r, fullBodyExtras('A').map(a => accRow(a.name, a.sets)));
             return r;
           }},
         { label: 'Day 3 — ' + middleName + ' + Deadlift', rows: () => {
             const r = [middleLift(), deadliftRow()];
             if (progMode === 'phraxture') r.push(backMainRow('Barbell Row'));
-            upperAcc.forEach(a => r.push({ ex: a.name, pres: a.sets, weight: '—', note: '' }));
+            appendUniqueRows(r, fullBodyVariantRows('B'));
+            appendUniqueRows(r, fullBodyExtras('B').map(a => accRow(a.name, a.sets)));
             return r;
           }},
         { label: 'Day 5 — ' + outerName + ' + Squat', rows: () => {
             const r = [outerLift(), squatRow()];
             if (progMode === 'phraxture') r.push(backMainRow('Weighted Pull-ups'));
-            lowerAcc.forEach(a => r.push({ ex: a.name, pres: a.sets, weight: '—', note: '' }));
-            upperAcc.forEach(a => r.push({ ex: a.name, pres: a.sets, weight: '—', note: '' }));
+            appendUniqueRows(r, fullBodyVariantRows('A'));
+            appendUniqueRows(r, fullBodyExtras('A').map(a => accRow(a.name, a.sets)));
             return r;
           }},
       ];
@@ -869,26 +1153,26 @@ function generatePDF(shouldDownload = true){
       const day3Name = pressOnDay1 ? 'Bench Press' : 'Press';
 
       addTrainingDay('Week ' + w + ' · Day 1 — Lower (Squat)', w, 0, (() => {
-          const r = [squatRow()];
-          lowerAcc.forEach(a => r.push({ ex: a.name, pres: a.sets, weight: '—', note: '' }));
+          const r = [squatRow(), mandatoryLowerRow(true)];
+          lowerExtras.forEach(a => r.push({ ex: a.name, pres: a.sets, weight: '—', note: '' }));
           return r;
         })());
 
       addTrainingDay('Week ' + w + ' · Day 2 — Upper (' + day1Name + ')', w, 1, (() => {
           const r = [day1Lift(), backMainRow('Weighted Pull-ups')];
-          upperAcc.forEach(a => r.push({ ex: a.name, pres: a.sets, weight: '—', note: '' }));
+          upperFocusRows('A').forEach(a => r.push(a));
           return r;
         })());
 
       addTrainingDay('Week ' + w + ' · Day 4 — Lower (Deadlift)', w, 3, (() => {
-          const r = [deadliftRow()];
-          lowerAcc.forEach(a => r.push({ ex: a.name, pres: a.sets, weight: '—', note: '' }));
+          const r = [deadliftRow(), mandatoryLowerRow(false)];
+          lowerExtras.forEach(a => r.push({ ex: a.name, pres: a.sets, weight: '—', note: '' }));
           return r;
         })());
 
       addTrainingDay('Week ' + w + ' · Day 5 — Upper (' + day3Name + ')', w, 4, (() => {
           const r = [day3Lift(), backMainRow('Barbell Row')];
-          upperAcc.forEach(a => r.push({ ex: a.name, pres: a.sets, weight: '—', note: '' }));
+          upperFocusRows('B').forEach(a => r.push(a));
           return r;
         })());
       addTrainingDay('Week ' + w + ' · Day 6', w, 5, []);
