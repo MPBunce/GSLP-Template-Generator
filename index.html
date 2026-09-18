@@ -317,7 +317,7 @@
         <div class="num-field"><span>+ PER SESSION</span><input type="number" id="press-inc" value="2.5" step="0.5"></div>
       </div>
     </div>
-    <div class="card">
+    <div class="card" id="phraks-pullup-card">
       <h3>Pull-ups <span class="tag">PHRAKS</span></h3>
       <div class="lift-row">
         <div class="num-field"><span>VARIANT</span><select id="pullup-variant"><option>Weighted Pull-ups</option><option>Weighted Chin-ups</option><option>Negative Pull-ups</option></select></div>
@@ -325,7 +325,7 @@
         <div class="num-field"><span>+ PER SESSION</span><input type="number" id="pullup-inc" value="2.5" step="0.5"></div>
       </div>
     </div>
-    <div class="card">
+    <div class="card" id="phraks-row-card">
       <h3>Row <span class="tag">PHRAKS</span></h3>
       <div class="lift-row">
         <div class="num-field"><span>VARIANT</span><select id="row-variant"><option>Barbell Row</option><option>Pendlay Row</option></select></div>
@@ -737,6 +737,8 @@ const fullBodyDayAPanel = document.getElementById('full-body-day-a-panel');
 const fullBodyDayBPanel = document.getElementById('full-body-day-b-panel');
 const upperLowerLowerPanel = document.getElementById('upper-lower-lower-panel');
 const upperLowerUpperPanel = document.getElementById('upper-lower-upper-panel');
+const phraksPullupCard = document.getElementById('phraks-pullup-card');
+const phraksRowCard = document.getElementById('phraks-row-card');
 const chestBackChoices = document.getElementById('chestback-choices');
 const shouldersChoices = document.getElementById('shoulders-choices');
 const armsChoices = document.getElementById('arms-choices');
@@ -750,6 +752,7 @@ const upperFocusNotes = {
 function updateAdditionalStrengthLabels(mode){
   const isUpperLower = mode === '4day';
   const isFullBody = mode === '3day' || mode === 'phraxture';
+  const isPhraks = mode === 'phraxture';
   additionalStrengthTitle.textContent = isUpperLower
     ? 'ADDITIONAL STRENGTH MOVEMENTS (TIED TO UPPER/LOWER DAYS)'
     : 'FULL-BODY DAY ACCESSORIES';
@@ -762,6 +765,8 @@ function updateAdditionalStrengthLabels(mode){
   fullBodyDayBPanel.style.display = isFullBody ? '' : 'none';
   upperLowerLowerPanel.style.display = isUpperLower ? '' : 'none';
   upperLowerUpperPanel.style.display = isUpperLower ? 'flex' : 'none';
+  phraksPullupCard.style.display = isPhraks ? '' : 'none';
+  phraksRowCard.style.display = isPhraks ? '' : 'none';
 }
 
 function updateUpperFocusChoices(focus){
