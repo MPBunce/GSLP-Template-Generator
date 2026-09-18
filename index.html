@@ -317,6 +317,22 @@
         <div class="num-field"><span>+ PER SESSION</span><input type="number" id="press-inc" value="2.5" step="0.5"></div>
       </div>
     </div>
+    <div class="card">
+      <h3>Pull-ups <span class="tag">PHRAKS</span></h3>
+      <div class="lift-row">
+        <div class="num-field"><span>VARIANT</span><select id="pullup-variant"><option>Weighted Pull-ups</option><option>Weighted Chin-ups</option><option>Negative Pull-ups</option></select></div>
+        <div class="num-field"><span>START (LB)</span><input type="number" id="pullup-start" value="0" step="2.5"></div>
+        <div class="num-field"><span>+ PER SESSION</span><input type="number" id="pullup-inc" value="2.5" step="0.5"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Row <span class="tag">PHRAKS</span></h3>
+      <div class="lift-row">
+        <div class="num-field"><span>VARIANT</span><select id="row-variant"><option>Barbell Row</option><option>Pendlay Row</option></select></div>
+        <div class="num-field"><span>START (LB)</span><input type="number" id="row-start" value="95" step="2.5"></div>
+        <div class="num-field"><span>+ PER SESSION</span><input type="number" id="row-inc" value="2.5" step="0.5"></div>
+      </div>
+    </div>
   </div>
 
   <h2 class="section-title" id="additional-strength-title">FULL-BODY DAY ACCESSORIES</h2>
@@ -700,18 +716,20 @@ function updateScheduleNote(mode = getProgramMode()){
   const deadlift = document.getElementById('dl-variant').value;
   const bench = document.getElementById('bench-variant').value;
   const press = document.getElementById('press-variant').value;
+  const pullup = document.getElementById('pullup-variant').value;
+  const row = document.getElementById('row-variant').value;
   const progressionNote = 'Weights are projected assuming you hit every prescribed rep. If you reset on a lift mid-plan, restart that lift from 90% using the reset rule above.';
 
   if (mode === '3day'){
     scheduleNote.textContent = '3 sessions/week: ' + press + ' + ' + squat + ', ' + bench + ' + ' + deadlift + ', ' + press + ' + ' + squat + '. ' + progressionNote;
   } else if (mode === 'phraxture'){
-    scheduleNote.textContent = '3 sessions/week: ' + press + ' + ' + squat + ' + Weighted Pull-ups, ' + bench + ' + ' + deadlift + ' + Barbell Row, then ' + press + ' + ' + squat + ' + Weighted Pull-ups. Back movements use 2x5, 1x5+ with weight added after 5+ reps on the third set.';
+    scheduleNote.textContent = '3 sessions/week: ' + press + ' + ' + squat + ' + ' + pullup + ', ' + bench + ' + ' + deadlift + ' + ' + row + ', then ' + press + ' + ' + squat + ' + ' + pullup + '. Bench and press swap places every other week; Phraks back lifts use 2x5, 1x5+ and progress independently.';
   } else {
     scheduleNote.textContent = '4 sessions/week: Day 1 Lower (' + squat + '), Day 2 Upper (' + press + ' or ' + bench + '), Day 3 Rest, Day 4 Lower (' + deadlift + '), Day 5 Upper (' + bench + ' or ' + press + '), Day 6 Rest, Day 7 Rest. ' + progressionNote;
   }
 }
 
-['squat-variant', 'dl-variant', 'bench-variant', 'press-variant'].forEach(id=>{
+['squat-variant', 'dl-variant', 'bench-variant', 'press-variant', 'pullup-variant', 'row-variant'].forEach(id=>{
   document.getElementById(id).addEventListener('change', ()=>updateScheduleNote());
 });
 
@@ -782,7 +800,7 @@ document.querySelectorAll('#program-mode button').forEach(btn=>{
     if (btn.dataset.mode === '3day'){
       programNote.textContent = 'The book\'s original template: Press+Squat, Bench+Deadlift, Press+Squat — three sessions a week, with Bench and Press swapping which day they land on every other week so both get equal work.';
     } else if (btn.dataset.mode === 'phraxture'){
-      programNote.textContent = 'A 3-day variation: press and squat on the outer days, bench and deadlift in the middle, with weighted pull-ups on the outer days and barbell rows on deadlift day.';
+      programNote.textContent = 'A 3-day variation: press and squat on the outer days, bench and deadlift in the middle. Bench and press swap places every other week; pull-ups (or negatives) and rows progress independently with the same 2.5 lb upper-body increment.';
     } else {
       programNote.textContent = 'A 4-day split adapted to Upper/Lower: Lower, Upper, rest, Lower, Upper, rest, rest. Bench and Press alternate across the two upper days, while Squat and Deadlift occupy the lower days.';
     }
@@ -899,6 +917,10 @@ function generatePDF(shouldDownload = true){
   const benchInc = parseFloat(document.getElementById('bench-inc').value);
   const pressStart = parseFloat(document.getElementById('press-start').value);
   const pressInc = parseFloat(document.getElementById('press-inc').value);
+  const pullupStart = parseFloat(document.getElementById('pullup-start').value);
+  const pullupInc = parseFloat(document.getElementById('pullup-inc').value);
+  const rowStart = parseFloat(document.getElementById('row-start').value);
+  const rowInc = parseFloat(document.getElementById('row-inc').value);
 
   const lowerExtras = [...document.querySelectorAll('input[data-lower-extra]:checked')]
       .map(el=>({name:el.dataset.name, sets:el.dataset.sets}));
@@ -911,7 +933,7 @@ function generatePDF(shouldDownload = true){
   const conditioning = getConditioningPlan();
 
   // session counters per lift (increment happens per occurrence of that lift)
-  let squatCount = 0, dlCount = 0, benchCount = 0, pressCount = 0;
+  let squatCount = 0, dlCount = 0, benchCount = 0, pressCount = 0, pullupCount = 0, rowCount = 0;
   const liftName = id => document.getElementById(id).value;
 
   const { jsPDF } = window.jspdf;
@@ -1017,6 +1039,16 @@ function generatePDF(shouldDownload = true){
     const wt = dlStart + dlInc * dlCount;
     dlCount++;
     return { ex: liftName('dl-variant'), pres: '1 x 5+', weight: wt + ' lb', note: '+' + dlInc + ' lb next session if you hit 5+ reps.' };
+  }
+  function pullupRow(){
+    const wt = pullupStart + pullupInc * pullupCount;
+    pullupCount++;
+    return { ex: liftName('pullup-variant'), pres: '2x5, 1x5+', weight: wt + ' lb', note: '+' + pullupInc + ' lb next session if you complete all 3 sets.' };
+  }
+  function rowMainRow(){
+    const wt = rowStart + rowInc * rowCount;
+    rowCount++;
+    return { ex: liftName('row-variant'), pres: '2x5, 1x5+', weight: wt + ' lb', note: '+' + rowInc + ' lb next session if you complete all 3 sets.' };
   }
   function backMainRow(name){
     return { ex: name, pres: '2x5, 1x5+', weight: '—', note: 'Add weight next session if you complete 5+ reps on the third set.' };
@@ -1134,21 +1166,21 @@ function generatePDF(shouldDownload = true){
       const trainingDays = [
         { label: 'Day 1 — ' + outerName + ' + Squat', rows: () => {
             const r = [outerLift(), squatRow()];
-            if (progMode === 'phraxture') r.push(backMainRow('Weighted Pull-ups'));
+          if (progMode === 'phraxture') r.push(pullupRow());
             appendUniqueRows(r, fullBodyVariantRows('A'));
             appendUniqueRows(r, fullBodyExtras('A').map(a => accRow(a.name, a.sets)));
             return r;
           }},
         { label: 'Day 3 — ' + middleName + ' + Deadlift', rows: () => {
             const r = [middleLift(), deadliftRow()];
-            if (progMode === 'phraxture') r.push(backMainRow('Barbell Row'));
+          if (progMode === 'phraxture') r.push(rowMainRow());
             appendUniqueRows(r, fullBodyVariantRows('B'));
             appendUniqueRows(r, fullBodyExtras('B').map(a => accRow(a.name, a.sets)));
             return r;
           }},
         { label: 'Day 5 — ' + outerName + ' + Squat', rows: () => {
             const r = [outerLift(), squatRow()];
-            if (progMode === 'phraxture') r.push(backMainRow('Weighted Pull-ups'));
+          if (progMode === 'phraxture') r.push(pullupRow());
             appendUniqueRows(r, fullBodyVariantRows('A'));
             appendUniqueRows(r, fullBodyExtras('A').map(a => accRow(a.name, a.sets)));
             return r;
