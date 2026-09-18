@@ -587,6 +587,10 @@
         <input type="checkbox" id="tmas-enable">
         <label for="tmas-enable">Include this protocol (borrowed from Bill Phillips)</label>
       </div>
+      <div class="lift-row">
+        <label class="name">Sessions / week</label>
+        <div class="num-field"><span>COUNT</span><input type="number" id="tmas-days" value="2" min="1" max="7" step="1"></div>
+      </div>
       <div class="weeks-note">A 20-minute RPE-ladder interval session on any cardio machine — effort climbs 5→9 in waves, capped with an all-out minute 19.</div>
     </div>
     <div class="card">
@@ -616,6 +620,7 @@
         <label class="name">Load / Duration</label>
         <div class="num-field"><span>LB</span><input type="number" id="ruck-weight" value="35" step="5"></div>
         <div class="num-field"><span>MIN</span><input type="number" id="ruck-minutes" value="45" step="5"></div>
+        <div class="num-field"><span>DAYS / WEEK</span><input type="number" id="ruck-days" value="1" min="1" max="2" step="1"></div>
       </div>
       <div class="weeks-note">Book's advice: start light (≤35 lb) and short, progress distance/speed before load, work up to 45-60 min several days/week.</div>
     </div>
@@ -866,13 +871,15 @@ function getConditioningPlan(){
   if (document.getElementById('ruck-enable').checked){
     const w = document.getElementById('ruck-weight').value;
     const m = document.getElementById('ruck-minutes').value;
-    plan.push('Ruck March (bonus layer) — ' + w + ' lb pack, ~' + m + ' minutes, several days/week.');
+    const d = document.getElementById('ruck-days').value;
+    plan.push('Ruck March (bonus layer) — ' + w + ' lb pack, ~' + m + ' minutes, ' + d + ' day(s)/week on non-lifting days.');
   }
   if (document.getElementById('vc1-enable').checked){
     plan.push('Villain Challenge 1 — six days/week. ' + getVC1Prescription());
   }
-  const includeTMAS = document.getElementById('tmas-enable').checked;
-  return { plan, includeTMAS };
+  const tmasDays = document.getElementById('tmas-enable').checked ? Number(document.getElementById('tmas-days').value) : 0;
+  if (tmasDays > 0) plan.push('20-Minute Aerobic Solution — ' + tmasDays + ' session(s)/week, after lifting or as standalone conditioning.');
+  return { plan, tmasDays: tmasDays };
 }
 
 let generatedProgram = null;
@@ -1080,20 +1087,31 @@ function generatePDF(shouldDownload = true){
 
   function conditioningForDay(dayIndex){
     const plan = [];
-    if (document.getElementById('hic-enable').checked && dayIndex < Number(document.getElementById('hic-count').value)){
-      plan.push('High Intensity Conditioning — 10 minutes or less.');
+    const liftingDays = progMode === '4day' ? [0, 1, 3, 4] : [0, 2, 4];
+    const restDays = [0, 1, 2, 3, 4, 5, 6].filter(day => !liftingDays.includes(day));
+    const safeRuckDays = restDays.filter(day => !liftingDays.includes((day + 1) % 7));
+    const preferredTMASDays = liftingDays.concat(restDays);
+    const hicDays = restDays.slice(0, Number(document.getElementById('hic-count').value));
+    const ruckDays = safeRuckDays.slice(0, Number(document.getElementById('ruck-days').value));
+    const tmasDays = preferredTMASDays.slice(0, conditioning.tmasDays);
+
+    if (document.getElementById('hic-enable').checked && hicDays.includes(dayIndex)){
+      plan.push('High Intensity Conditioning — 10 minutes or less; standalone rest-day session.');
     }
     if (document.getElementById('lic-enable').checked && dayIndex < Number(document.getElementById('lic-days').value)){
       const minutes = document.getElementById('lic-minutes').value;
       plan.push('Low Intensity Conditioning — fasted walking, ~' + minutes + ' minutes.');
     }
-    if (document.getElementById('ruck-enable').checked && dayIndex < 5){
+    if (document.getElementById('ruck-enable').checked && ruckDays.includes(dayIndex)){
       const weight = document.getElementById('ruck-weight').value;
       const minutes = document.getElementById('ruck-minutes').value;
-      plan.push('Ruck March — ' + weight + ' lb pack, ~' + minutes + ' minutes.');
+      plan.push('Ruck March — ' + weight + ' lb pack, ~' + minutes + ' minutes; non-lifting day, not before a lower-body session.');
     }
     if (document.getElementById('vc1-enable').checked && dayIndex < 6){
-      plan.push('Villain Challenge 1 — ' + getVC1Prescription());
+      plan.push('Villain Challenge 1 — ' + getVC1Prescription() + (liftingDays.includes(dayIndex) ? ' Complete after lifting.' : ' Standalone conditioning session.'));
+    }
+    if (tmasDays.includes(dayIndex)){
+      plan.push('20-Minute Aerobic Solution — after lifting or as a standalone session.');
     }
     return plan;
   }
@@ -1258,7 +1276,7 @@ function generatePDF(shouldDownload = true){
         });
       }
 
-      if (conditioning.includeTMAS){
+      if (conditioning.tmasDays > 0){
         y += 16;
         ensureRoom(60);
         doc.setFont('helvetica','bold');
@@ -1295,7 +1313,7 @@ function generatePDF(shouldDownload = true){
     }
 
     header(sess.label, 'Greyskull LP — complete each section in order and log actual work as you go');
-    if (sess.rows.length === 0 && dailyWork.items.length === 0 && sess.conditioning.length === 0 && !conditioning.includeTMAS){
+    if (sess.rows.length === 0 && dailyWork.items.length === 0 && sess.conditioning.length === 0){
       sectionHeading('REST');
       doc.setFont('helvetica','normal');
       doc.setFontSize(10.5);
@@ -1327,28 +1345,32 @@ function generatePDF(shouldDownload = true){
       y += 16;
 
       rows.forEach(r=>{
-        ensureRoom(46);
+        const exerciseLines = doc.splitTextToSize(r.ex, 175);
+        const prescriptionLines = doc.splitTextToSize(r.pres, 135);
+        const weightLines = doc.splitTextToSize(sess.week === 1 ? String(r.weight) : '', 85);
+        const rowHeight = Math.max(exerciseLines.length, prescriptionLines.length, weightLines.length, 1) * 12;
+        ensureRoom(rowHeight + (r.note ? 30 : 18));
         doc.setFont('helvetica','bold');
         doc.setFontSize(10.5);
         doc.setTextColor(20,20,20);
-        doc.text(r.ex, colX[0], y, {maxWidth:175});
+        doc.text(exerciseLines, colX[0], y);
         doc.setFont('helvetica','normal');
         doc.setFontSize(9.5);
         doc.setTextColor(70,70,70);
-        doc.text(r.pres, colX[1], y, {maxWidth:135});
-        doc.text(sess.week === 1 ? String(r.weight) : '', colX[2], y, {maxWidth:85});
+        doc.text(prescriptionLines, colX[1], y);
+        doc.text(weightLines, colX[2], y);
         doc.setDrawColor(210,210,210);
-        doc.line(colX[3], y+2, pageW-marginX, y+2);
-        y += 14;
+        doc.line(colX[3], y + rowHeight - 2, pageW-marginX, y + rowHeight - 2);
+        y += rowHeight + 4;
         if (r.note){
           doc.setFontSize(8);
           doc.setTextColor(150,110,60);
           doc.text(r.note, colX[0], y, {maxWidth: pageW - marginX*2 - 10});
           y += 12;
         }
-        y += 12;
         doc.setDrawColor(230,230,230);
-        doc.line(marginX, y-6, pageW-marginX, y-6);
+        doc.line(marginX, y + 2, pageW-marginX, y + 2);
+        y += 14;
       });
     }
 
@@ -1358,9 +1380,9 @@ function generatePDF(shouldDownload = true){
 
       y += 6;
       sectionHeading('CARDIO / CONDITIONING');
-      renderPlanItems(sess.conditioning, 'No conditioning work scheduled.');
+      renderPlanItems(sess.conditioning.filter(item => !item.startsWith('20-Minute Aerobic Solution')), 'No conditioning work scheduled.');
 
-      if (conditioning.includeTMAS){
+      if (sess.conditioning.some(item => item.startsWith('20-Minute Aerobic Solution'))){
         y += 4;
         sectionHeading('THE 20-MINUTE AEROBIC SOLUTION');
         doc.setFont('helvetica','normal');
@@ -1421,7 +1443,7 @@ function generateExcel(){
       weekRows.push([day, '', '', '', '', '', '']);
       merges.push({ s: { r: dayRow, c: 0 }, e: { r: dayRow, c: 6 } });
 
-      const isRestDay = sess.rows.length === 0 && dailyWork.items.length === 0 && sess.conditioning.length === 0 && !conditioning.includeTMAS;
+      const isRestDay = sess.rows.length === 0 && dailyWork.items.length === 0 && sess.conditioning.length === 0;
       if (isRestDay){
         const restRow = weekRows.length;
         weekRows.push(['', 'REST', 'No scheduled work', '', '', '', '']);
@@ -1444,12 +1466,12 @@ function generateExcel(){
         dailyWork.items.forEach(item=>weekRows.push(['', 'Daily Work', item, '', '', '', 'Complete after lifting.']));
       }
 
-      if (sess.conditioning.length > 0 || conditioning.includeTMAS){
+      if (sess.conditioning.length > 0){
         const cardioRow = weekRows.length;
         weekRows.push(['', 'CARDIO / CONDITIONING', '', '', '', '', '']);
         merges.push({ s: { r: cardioRow, c: 1 }, e: { r: cardioRow, c: 6 } });
-        sess.conditioning.forEach(item=>weekRows.push(['', 'Cardio', item, '', '', '', 'Complete after daily work.']));
-        if (conditioning.includeTMAS) weekRows.push(['', 'Cardio', '20-Minute Aerobic Solution', 'RPE ladder: 5-10', '', '', 'See PDF for minute-by-minute table.']);
+        sess.conditioning.filter(item => !item.startsWith('20-Minute Aerobic Solution')).forEach(item=>weekRows.push(['', 'Cardio', item, '', '', '', 'Complete after daily work.']));
+        if (sess.conditioning.some(item => item.startsWith('20-Minute Aerobic Solution'))) weekRows.push(['', 'Cardio', '20-Minute Aerobic Solution', 'RPE ladder: 5-10', '', '', 'See PDF for minute-by-minute table.']);
       }
       weekRows.push(['', '', '', '', '', '', '']);
     });
