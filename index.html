@@ -342,14 +342,6 @@
       <h3 id="lower-addons-heading">Day A — Squat</h3>
       <div id="full-body-day-a-panel" class="accessory-group">
         <h4>SELECT DAY A ACCESSORIES</h4>
-        <div class="day-variant-grid">
-          <label>LOWER <select id="full-body-day-a-lower">
-            <option>Single-Leg RDL</option>
-            <option>Bulgarian Split Squat</option>
-            <option>Reverse Lunge</option>
-            <option>Step-up</option>
-          </select></label>
-        </div>
         <h4>PULL</h4>
         <div class="lower-extras-list">
           <label class="acc-item book"><input type="checkbox" data-full-body-extra="a" data-name="Barbell Row" data-sets="2 x 6-8"><span>Barbell Row</span></label>
@@ -398,8 +390,8 @@
       <div id="upper-lower-lower-panel" class="accessory-group" style="display:none;">
         <div class="weeks-note" style="margin-bottom:10px;">Pick one lower accessory for each lower day.</div>
         <div class="day-variant-grid">
-          <label>LOWER A — SQUAT <select id="lower-a-variant"><option>Single-Leg RDL</option><option>Bulgarian Split Squat</option><option>Reverse Lunge</option><option>Step-up</option></select></label>
-          <label>LOWER B — DEADLIFT <select id="lower-b-variant"><option>Split Squat</option><option>Single-Leg RDL</option><option>Reverse Lunge</option><option>Step-up</option></select></label>
+          <label>LOWER A — SQUAT <select id="lower-a-variant"><option>Single-Leg RDL</option><option>Bulgarian Split Squat</option><option>RDL</option><option>Pause Squat</option><option>Reverse Lunge</option><option>Step-up</option></select></label>
+          <label>LOWER B — DEADLIFT <select id="lower-b-variant"><option>Bulgarian Split Squat</option><option>Single-Leg RDL</option><option>RDL</option><option>Pause Squat</option><option>Reverse Lunge</option><option>Step-up</option></select></label>
         </div>
         <div class="accessory-group">
           <h4>OPTIONAL EXTRAS — ADDED TO BOTH LOWER DAYS</h4>
@@ -420,9 +412,6 @@
       <h3 id="upper-addons-heading">Day B — Deadlift</h3>
       <div id="full-body-day-b-panel" class="accessory-group">
         <h4>SELECT DAY B ACCESSORIES</h4>
-        <div class="day-variant-grid">
-          <label>LOWER <select id="full-body-day-b-lower"><option>Split Squat</option><option>Single-Leg RDL</option><option>Reverse Lunge</option><option>Step-up</option></select></label>
-        </div>
         <h4>PULL</h4>
         <div class="lower-extras-list">
           <label class="acc-item book"><input type="checkbox" data-full-body-extra="b" data-name="Barbell Row" data-sets="2 x 6-8"><span>Barbell Row</span></label>
@@ -1068,7 +1057,9 @@ function generatePDF(shouldDownload = true){
 
   function lowerAccessoryPrescription(name){
     const unilateral = ['Single-Leg RDL', 'Bulgarian Split Squat', 'Split Squat', 'Reverse Lunge', 'Step-up'];
-    return unilateral.includes(name) ? '3 x 8-12/leg (double progression)' : '3 x 12';
+    const doubleProgression = ['RDL', 'Pause Squat'];
+    if (unilateral.includes(name)) return '3 x 8-12/leg (double progression)';
+    return doubleProgression.includes(name) ? '3 x 8-12 (double progression)' : '3 x 12';
   }
 
   function mandatoryLowerRow(isSquatDay){
@@ -1105,13 +1096,6 @@ function generatePDF(shouldDownload = true){
       accRow(push, '4 x 6-10'),
       accRow('Barbell Curl', '3 x 10-12'),
       accRow('Triceps Pressdown', '3 x 10-12')
-    ];
-  }
-
-  function fullBodyVariantRows(day){
-    const lower = getDayVariant(day === 'A' ? 'full-body-day-a-lower' : 'full-body-day-b-lower');
-    return [
-      accRow(lower, lowerAccessoryPrescription(lower))
     ];
   }
 
@@ -1175,21 +1159,18 @@ function generatePDF(shouldDownload = true){
         { label: 'Day 1 — ' + outerName + ' + Squat', rows: () => {
             const r = [outerLift(), squatRow()];
           if (progMode === 'phraxture') r.push(pullupRow());
-            appendUniqueRows(r, fullBodyVariantRows('A'));
             appendUniqueRows(r, fullBodyExtras('A').map(a => accRow(a.name, a.sets)));
             return r;
           }},
         { label: 'Day 3 — ' + middleName + ' + Deadlift', rows: () => {
             const r = [middleLift(), deadliftRow()];
           if (progMode === 'phraxture') r.push(rowMainRow());
-            appendUniqueRows(r, fullBodyVariantRows('B'));
             appendUniqueRows(r, fullBodyExtras('B').map(a => accRow(a.name, a.sets)));
             return r;
           }},
         { label: 'Day 5 — ' + outerName + ' + Squat', rows: () => {
             const r = [outerLift(), squatRow()];
           if (progMode === 'phraxture') r.push(pullupRow());
-            appendUniqueRows(r, fullBodyVariantRows('A'));
             appendUniqueRows(r, fullBodyExtras('A').map(a => accRow(a.name, a.sets)));
             return r;
           }},
