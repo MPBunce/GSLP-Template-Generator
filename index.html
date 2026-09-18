@@ -339,7 +339,7 @@
   <div class="weeks-note" id="additional-strength-note" style="margin-bottom:12px;">Choose accessories separately for each full-body training day. Chin-ups, push-ups, and other pure-bodyweight work live in Section 2 below.</div>
   <div class="grid2">
     <div class="card">
-      <h3 id="lower-addons-heading">Day A — Squat + Press</h3>
+      <h3 id="lower-addons-heading">Day A — Squat</h3>
       <div id="full-body-day-a-panel" class="accessory-group">
         <h4>SELECT DAY A ACCESSORIES</h4>
         <div class="day-variant-grid">
@@ -417,7 +417,7 @@
       </div>
     </div>
     <div class="card">
-      <h3 id="upper-addons-heading">Day B — Deadlift + Bench</h3>
+      <h3 id="upper-addons-heading">Day B — Deadlift</h3>
       <div id="full-body-day-b-panel" class="accessory-group">
         <h4>SELECT DAY B ACCESSORIES</h4>
         <div class="day-variant-grid">
@@ -730,7 +730,10 @@ function updateScheduleNote(mode = getProgramMode()){
 }
 
 ['squat-variant', 'dl-variant', 'bench-variant', 'press-variant', 'pullup-variant', 'row-variant'].forEach(id=>{
-  document.getElementById(id).addEventListener('change', ()=>updateScheduleNote());
+  document.getElementById(id).addEventListener('change', ()=>{
+    updateScheduleNote();
+    updateAdditionalStrengthLabels(getProgramMode());
+  });
 });
 
 const fullBodyDayAPanel = document.getElementById('full-body-day-a-panel');
@@ -759,8 +762,8 @@ function updateAdditionalStrengthLabels(mode){
   additionalStrengthNote.textContent = isUpperLower
     ? 'Choose the lower accessory for each lower day, then select an upper focus and its exercise choices.'
     : 'Choose accessories separately for Day A (Squat + Press) and Day B (Deadlift + Bench).';
-  lowerAddonsHeading.textContent = isUpperLower ? 'Lower Day Accessories' : 'Day A — Squat + Press';
-  upperAddonsHeading.textContent = isUpperLower ? 'Upper Day Accessories' : 'Day B — Deadlift + Bench';
+  lowerAddonsHeading.textContent = isUpperLower ? 'Lower Day Accessories' : 'Day A — ' + document.getElementById('squat-variant').value;
+  upperAddonsHeading.textContent = isUpperLower ? 'Upper Day Accessories' : 'Day B — ' + document.getElementById('dl-variant').value;
   fullBodyDayAPanel.style.display = isFullBody ? '' : 'none';
   fullBodyDayBPanel.style.display = isFullBody ? '' : 'none';
   upperLowerLowerPanel.style.display = isUpperLower ? '' : 'none';
