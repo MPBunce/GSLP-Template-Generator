@@ -90,6 +90,15 @@
   .rules b{color:var(--chalk);}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
   @media(max-width:720px){.grid2{grid-template-columns:1fr;}}
+  #main-lifts-grid.full-body-layout #squat-card{grid-column:1;grid-row:1;}
+  #main-lifts-grid.full-body-layout #press-card{grid-column:1;grid-row:2;}
+  #main-lifts-grid.full-body-layout #deadlift-card{grid-column:2;grid-row:1;}
+  #main-lifts-grid.full-body-layout #bench-card{grid-column:2;grid-row:2;}
+  #main-lifts-grid.phraks-layout #phraks-pullup-card{grid-column:1;grid-row:3;}
+  #main-lifts-grid.phraks-layout #phraks-row-card{grid-column:2;grid-row:3;}
+  @media(max-width:720px){
+    #main-lifts-grid.full-body-layout > .card{grid-column:auto;grid-row:auto;}
+  }
   .card{
     background:var(--panel);
     border:1px solid var(--line);
@@ -283,8 +292,8 @@
   </div>
 
   <h2 class="section-title">MAIN LIFTS &amp; STARTING NUMBERS</h2>
-  <div class="grid2">
-    <div class="card">
+  <div class="grid2" id="main-lifts-grid">
+    <div class="card" id="squat-card">
       <h3>Squat</h3>
       <div class="lift-row">
         <div class="num-field"><span>VARIANT</span><select id="squat-variant"><option>Squat</option><option>Front squat</option><option>Box squat</option><option>Specialty bar squat</option></select></div>
@@ -292,7 +301,7 @@
         <div class="num-field"><span>+ PER SESSION</span><input type="number" id="squat-inc" value="5" step="0.5"></div>
       </div>
     </div>
-    <div class="card">
+    <div class="card" id="deadlift-card">
       <h3>Deadlift</h3>
       <div class="lift-row">
         <div class="num-field"><span>VARIANT</span><select id="dl-variant"><option>Deadlift</option><option>Deficit deadlift</option><option>Rack pull</option><option>Snatch-grip deadlift</option></select></div>
@@ -301,7 +310,7 @@
       </div>
       <div class="weeks-note">One hard working set only — 1 x 5+.</div>
     </div>
-    <div class="card">
+    <div class="card" id="bench-card">
       <h3>Bench Press</h3>
       <div class="lift-row">
         <div class="num-field"><span>VARIANT</span><select id="bench-variant"><option>Bench Press</option><option>Incline bench press</option><option>Decline bench press</option><option>Close-grip bench press</option><option>Dumbbell bench press</option><option>Floor press</option><option>Dips</option></select></div>
@@ -309,20 +318,12 @@
         <div class="num-field"><span>+ PER SESSION</span><input type="number" id="bench-inc" value="2.5" step="0.5"></div>
       </div>
     </div>
-    <div class="card">
+    <div class="card" id="press-card">
       <h3>Press</h3>
       <div class="lift-row">
-        <div class="num-field"><span>VARIANT</span><select id="press-variant"><option>Press (overhead)</option><option>Push press</option><option>Seated press</option><option>Seated dumbbell press</option><option>Clean and press</option></select></div>
+        <div class="num-field"><span>VARIANT</span><select id="press-variant"><option>Press (overhead)</option><option>Push press</option><option>Seated press</option><option>Seated dumbbell press</option><option>Clean and press</option><option>Incline Press</option><option>Dips</option></select></div>
         <div class="num-field"><span>START (LB)</span><input type="number" id="press-start" value="65" step="2.5"></div>
         <div class="num-field"><span>+ PER SESSION</span><input type="number" id="press-inc" value="2.5" step="0.5"></div>
-      </div>
-    </div>
-    <div class="card" id="phraks-pullup-card">
-      <h3>Pull-ups <span class="tag">PHRAKS</span></h3>
-      <div class="lift-row">
-        <div class="num-field"><span>VARIANT</span><select id="pullup-variant"><option>Weighted Pull-ups</option><option>Weighted Chin-ups</option><option>Negative Pull-ups</option></select></div>
-        <div class="num-field"><span>START (LB)</span><input type="number" id="pullup-start" value="0" step="2.5"></div>
-        <div class="num-field"><span>+ PER SESSION</span><input type="number" id="pullup-inc" value="2.5" step="0.5"></div>
       </div>
     </div>
     <div class="card" id="phraks-row-card">
@@ -331,6 +332,14 @@
         <div class="num-field"><span>VARIANT</span><select id="row-variant"><option>Barbell Row</option><option>Pendlay Row</option></select></div>
         <div class="num-field"><span>START (LB)</span><input type="number" id="row-start" value="95" step="2.5"></div>
         <div class="num-field"><span>+ PER SESSION</span><input type="number" id="row-inc" value="2.5" step="0.5"></div>
+      </div>
+    </div>
+    <div class="card" id="phraks-pullup-card">
+      <h3>Pull-ups <span class="tag">PHRAKS</span></h3>
+      <div class="lift-row">
+        <div class="num-field"><span>VARIANT</span><select id="pullup-variant"><option>Weighted Pull-ups</option><option>Weighted Chin-ups</option><option>Negative Pull-ups</option></select></div>
+        <div class="num-field"><span>START (LB)</span><input type="number" id="pullup-start" value="0" step="2.5"></div>
+        <div class="num-field"><span>+ PER SESSION</span><input type="number" id="pullup-inc" value="2.5" step="0.5"></div>
       </div>
     </div>
   </div>
@@ -729,6 +738,7 @@ const fullBodyDayAPanel = document.getElementById('full-body-day-a-panel');
 const fullBodyDayBPanel = document.getElementById('full-body-day-b-panel');
 const upperLowerLowerPanel = document.getElementById('upper-lower-lower-panel');
 const upperLowerUpperPanel = document.getElementById('upper-lower-upper-panel');
+const mainLiftsGrid = document.getElementById('main-lifts-grid');
 const phraksPullupCard = document.getElementById('phraks-pullup-card');
 const phraksRowCard = document.getElementById('phraks-row-card');
 const chestBackChoices = document.getElementById('chestback-choices');
@@ -745,6 +755,8 @@ function updateAdditionalStrengthLabels(mode){
   const isUpperLower = mode === '4day';
   const isFullBody = mode === '3day' || mode === 'phraxture';
   const isPhraks = mode === 'phraxture';
+  mainLiftsGrid.classList.toggle('full-body-layout', isFullBody);
+  mainLiftsGrid.classList.toggle('phraks-layout', isPhraks);
   additionalStrengthTitle.textContent = isUpperLower
     ? 'ADDITIONAL STRENGTH MOVEMENTS (TIED TO UPPER/LOWER DAYS)'
     : 'FULL-BODY DAY ACCESSORIES';
@@ -1154,23 +1166,27 @@ function generatePDF(shouldDownload = true){
       const outerName = benchOnWedThisWeek ? 'Press' : 'Bench Press';
       const middleLift = benchOnWedThisWeek ? benchRow : pressRow;
       const middleName = benchOnWedThisWeek ? 'Bench Press' : 'Press';
+      const outerPull = benchOnWedThisWeek ? pullupRow : rowMainRow;
+      const outerPullName = benchOnWedThisWeek ? liftName('pullup-variant') : liftName('row-variant');
+      const middlePull = benchOnWedThisWeek ? rowMainRow : pullupRow;
+      const middlePullName = benchOnWedThisWeek ? liftName('row-variant') : liftName('pullup-variant');
 
       const trainingDays = [
-        { label: 'Day 1 — ' + outerName + ' + Squat', rows: () => {
+        { label: 'Day 1 — ' + outerName + ' + Squat' + (progMode === 'phraxture' ? ' + ' + outerPullName : ''), rows: () => {
             const r = [outerLift(), squatRow()];
-          if (progMode === 'phraxture') r.push(pullupRow());
+            if (progMode === 'phraxture') r.push(outerPull());
             appendUniqueRows(r, fullBodyExtras('A').map(a => accRow(a.name, a.sets)));
             return r;
           }},
-        { label: 'Day 3 — ' + middleName + ' + Deadlift', rows: () => {
+        { label: 'Day 3 — ' + middleName + ' + Deadlift' + (progMode === 'phraxture' ? ' + ' + middlePullName : ''), rows: () => {
             const r = [middleLift(), deadliftRow()];
-          if (progMode === 'phraxture') r.push(rowMainRow());
+            if (progMode === 'phraxture') r.push(middlePull());
             appendUniqueRows(r, fullBodyExtras('B').map(a => accRow(a.name, a.sets)));
             return r;
           }},
-        { label: 'Day 5 — ' + outerName + ' + Squat', rows: () => {
+        { label: 'Day 5 — ' + outerName + ' + Squat' + (progMode === 'phraxture' ? ' + ' + outerPullName : ''), rows: () => {
             const r = [outerLift(), squatRow()];
-          if (progMode === 'phraxture') r.push(pullupRow());
+            if (progMode === 'phraxture') r.push(outerPull());
             appendUniqueRows(r, fullBodyExtras('A').map(a => accRow(a.name, a.sets)));
             return r;
           }},
