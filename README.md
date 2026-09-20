@@ -14,5 +14,4 @@ This is a standalone HTML application powered by client-side JavaScript. No inst
 
 ## TODO
 
-- Update the accessory work.
 - Confirm that the cardio programming is as expected.

@@ -517,7 +517,7 @@
   <!-- ============ SECTION 2: DAILY WORK ============ -->
   <div class="section-banner">
     <span class="num">2</span><span class="title">DAILY WORK — THE BODYWEIGHT LAYER</span>
-    <div class="sub">The book's "Section Two: Bodyweight Training." Runs every day, independent of which lifting day it is — never taken to failure, always a little more than last week.</div>
+    <div class="sub">The book's "Section Two: Bodyweight Training." Runs six days a week, independent of which lifting day it is — Sunday is off, never taken to failure, always a little more than last week.</div>
   </div>
 
   <h2 class="section-title">METHOD</h2>
@@ -1268,7 +1268,7 @@ function generatePDF(shouldDownload = true){
     newPage();
 
     if (sess.type === 'daily'){
-      header(sess.label, 'Section 2 (Daily Work) + Section 3 (Conditioning) — applies every day this week, lifting or not');
+      header(sess.label, 'Section 2 (Daily Work) + Section 3 (Conditioning) — applies six days this week, lifting or not, with Sunday off');
 
       doc.setFont('helvetica','bold');
       doc.setFontSize(11);
@@ -1276,9 +1276,9 @@ function generatePDF(shouldDownload = true){
       doc.text('DAILY WORK', marginX, y);
       y += 18;
 
-      if (dailyWork.items.length === 0){
+      if (dailyWork.items.length === 0 || sess.day === 6){
         doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(120,120,120);
-        doc.text('No daily bodyweight work selected.', marginX, y);
+        doc.text('Sunday is a full day off for daily bodyweight work.', marginX, y);
         y += 20;
       } else {
         dailyWork.items.forEach(line=>{
@@ -1411,9 +1411,11 @@ function generatePDF(shouldDownload = true){
       });
     }
 
-      y += 6;
-      sectionHeading('DAILY WORK');
-      renderPlanItems(dailyWork.items, 'No daily bodyweight work selected.');
+      if (sess.day !== 6) {
+        y += 6;
+        sectionHeading('DAILY WORK');
+        renderPlanItems(dailyWork.items, 'No daily bodyweight work selected.');
+      }
 
       y += 6;
       sectionHeading('CARDIO / CONDITIONING');
@@ -1496,7 +1498,7 @@ function generateExcel(){
         }
       }
 
-      if (dailyWork.items.length > 0){
+      if (dailyWork.items.length > 0 && sess.day !== 6){
         const dailyRow = weekRows.length;
         weekRows.push(['', 'DAILY WORK', '', '', '', '', '']);
         merges.push({ s: { r: dailyRow, c: 1 }, e: { r: dailyRow, c: 6 } });
