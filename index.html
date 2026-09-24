@@ -88,7 +88,8 @@
     margin-bottom:8px;
   }
   .rules b{color:var(--chalk);}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;}
+  .grid2 + .grid2{margin-top:20px;}
   @media(max-width:720px){.grid2{grid-template-columns:1fr;}}
   #main-lifts-grid.full-body-layout #squat-card{grid-column:1;grid-row:1;}
   #main-lifts-grid.full-body-layout #press-card{grid-column:1;grid-row:2;}
@@ -638,6 +639,18 @@
       </div>
       <div class="weeks-note">Book's advice: start light (≤35 lb) and short, progress distance/speed before load, work up to 45-60 min several days/week.</div>
     </div>
+    <div class="card">
+      <h3>Daily Steps</h3>
+      <div class="small-field" style="margin-top:0;">
+        <input type="checkbox" id="steps-enable">
+        <label for="steps-enable">Include daily step target</label>
+      </div>
+      <div class="lift-row">
+        <label class="name">Minimum steps / day</label>
+        <div class="num-field"><span>STEPS</span><input type="number" id="steps-target" value="10000" min="10000" step="500"></div>
+      </div>
+      <div class="weeks-note">A simple daily movement target. Keep the minimum at 10,000 steps and use walking to make up the difference.</div>
+    </div>
   </div>
 
   <h2 class="section-title">SCHEDULE</h2>
@@ -895,6 +908,10 @@ function getConditioningPlan(){
     const m = document.getElementById('lic-minutes').value;
     plan.push('Low Intensity Conditioning — fasted walking, ' + d + ' day(s)/week, ~' + m + ' minutes.');
   }
+  if (document.getElementById('steps-enable').checked){
+    const steps = Math.max(10000, Number(document.getElementById('steps-target').value) || 10000);
+    plan.push('Daily Steps — minimum ' + steps.toLocaleString() + ' steps every day.');
+  }
   if (document.getElementById('ruck-enable').checked){
     const w = document.getElementById('ruck-weight').value;
     const m = document.getElementById('ruck-minutes').value;
@@ -1137,6 +1154,10 @@ function generatePDF(shouldDownload = true){
     if (document.getElementById('lic-enable').checked && dayIndex < Number(document.getElementById('lic-days').value)){
       const minutes = document.getElementById('lic-minutes').value;
       plan.push('Low Intensity Conditioning — fasted walking, ~' + minutes + ' minutes.');
+    }
+    if (document.getElementById('steps-enable').checked){
+      const steps = Math.max(10000, Number(document.getElementById('steps-target').value) || 10000);
+      plan.push('Daily Steps — minimum ' + steps.toLocaleString() + ' steps today.');
     }
     if (document.getElementById('ruck-enable').checked && ruckDays.includes(dayIndex)){
       const weight = document.getElementById('ruck-weight').value;
