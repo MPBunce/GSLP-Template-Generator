@@ -1270,105 +1270,29 @@ function generatePDF(shouldDownload = true){
 
   function renderPlanItems(items, emptyText){
     if (items.length === 0){
+      ensureRoom(20);
       doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(120,120,120);
       doc.text(emptyText, marginX, y);
       y += 20;
       return;
     }
+    const bulletIndent = 12;
     items.forEach(line=>{
-      ensureRoom(20);
       doc.setFont('helvetica','normal');
       doc.setFontSize(10.5);
       doc.setTextColor(30,30,30);
-      doc.text('•  ' + line, marginX, y, {maxWidth: pageW - marginX*2 - 10});
-      y += 18;
+      // Wrap first so the height reflects every line; a fixed step overlapped wrapped items.
+      const wrapped = doc.splitTextToSize(line, pageW - marginX*2 - bulletIndent);
+      const lineH = 10.5 * doc.getLineHeightFactor();
+      ensureRoom(wrapped.length * lineH + 6);
+      doc.text('•', marginX, y);
+      doc.text(wrapped, marginX + bulletIndent, y);
+      y += wrapped.length * lineH + 6;
     });
   }
 
   sessions.forEach((sess) => {
     newPage();
-
-    if (sess.type === 'daily'){
-      header(sess.label, 'Section 2 (Daily Work) + Section 3 (Conditioning) — applies six days this week, lifting or not, with Sunday off');
-
-      doc.setFont('helvetica','bold');
-      doc.setFontSize(11);
-      doc.setTextColor(251,73,52);
-      doc.text('DAILY WORK', marginX, y);
-      y += 18;
-
-      if (dailyWork.items.length === 0 || sess.day === 6){
-        doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(120,120,120);
-        doc.text('Sunday is a full day off for daily bodyweight work.', marginX, y);
-        y += 20;
-      } else {
-        dailyWork.items.forEach(line=>{
-          ensureRoom(20);
-          doc.setFont('helvetica','normal');
-          doc.setFontSize(10.5);
-          doc.setTextColor(30,30,30);
-          doc.text('•  ' + line, marginX, y, {maxWidth: pageW - marginX*2 - 10});
-          y += 18;
-        });
-      }
-      y += 14;
-
-      doc.setFont('helvetica','bold');
-      doc.setFontSize(11);
-      doc.setTextColor(251,73,52);
-      doc.text('CONDITIONING', marginX, y);
-      y += 18;
-
-      if (conditioning.plan.length === 0){
-        doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(120,120,120);
-        doc.text('No conditioning work selected.', marginX, y);
-        y += 20;
-      } else {
-        conditioning.plan.forEach(line=>{
-          ensureRoom(20);
-          doc.setFont('helvetica','normal');
-          doc.setFontSize(10.5);
-          doc.setTextColor(30,30,30);
-          doc.text('•  ' + line, marginX, y, {maxWidth: pageW - marginX*2 - 10});
-          y += 18;
-        });
-      }
-
-      if (conditioning.tmasDays > 0){
-        y += 16;
-        ensureRoom(60);
-        doc.setFont('helvetica','bold');
-        doc.setFontSize(11);
-        doc.setTextColor(251,73,52);
-        doc.text('THE 20-MINUTE AEROBIC SOLUTION', marginX, y);
-        y += 16;
-        doc.setFont('helvetica','normal');
-        doc.setFontSize(9.5);
-        doc.setTextColor(70,70,70);
-        doc.text('Perceived exertion scale, 1-10. Use on any cardio machine (treadmill preferred).', marginX, y, {maxWidth: pageW - marginX*2 - 10});
-        y += 20;
-
-        const tmasTable = [
-          [1,'5 (warm up)'],[2,'5 (warm up)'],[3,'6'],[4,'7'],[5,'8'],[6,'9'],[7,'6'],[8,'7'],
-          [9,'8'],[10,'9'],[11,'6'],[12,'7'],[13,'8'],[14,'9'],[15,'6'],[16,'7'],[17,'8'],[18,'9'],
-          [19,'10 (all out effort)'],[20,'5 (cool down)']
-        ];
-        const colStart = [marginX, marginX+260];
-        for (let i=0; i<tmasTable.length; i+=2){
-          ensureRoom(16);
-          doc.setFontSize(9.5);
-          doc.setTextColor(30,30,30);
-          const [min1, lvl1] = tmasTable[i];
-          doc.text('Min ' + min1 + ':  ' + lvl1, colStart[0], y);
-          if (tmasTable[i+1]){
-            const [min2, lvl2] = tmasTable[i+1];
-            doc.text('Min ' + min2 + ':  ' + lvl2, colStart[1], y);
-          }
-          y += 15;
-        }
-      }
-      return;
-    }
 
     header(sess.label, 'Greyskull LP — complete each section in order and log actual work as you go');
     if (sess.rows.length === 0 && dailyWork.items.length === 0 && sess.conditioning.length === 0){
@@ -1403,11 +1327,18 @@ function generatePDF(shouldDownload = true){
       y += 16;
 
       rows.forEach(r=>{
+        // Measure each column in the font it is drawn with, otherwise wrapping uses whatever size was set last.
+        doc.setFont('helvetica','bold');
+        doc.setFontSize(10.5);
         const exerciseLines = doc.splitTextToSize(r.ex, 175);
+        doc.setFont('helvetica','normal');
+        doc.setFontSize(9.5);
         const prescriptionLines = doc.splitTextToSize(r.pres, 135);
         const weightLines = doc.splitTextToSize(sess.week === 1 ? String(r.weight) : '', 85);
+        doc.setFontSize(8);
+        const noteLines = r.note ? doc.splitTextToSize(r.note, pageW - marginX*2) : [];
         const rowHeight = Math.max(exerciseLines.length, prescriptionLines.length, weightLines.length, 1) * 12;
-        ensureRoom(rowHeight + (r.note ? 30 : 18));
+        ensureRoom(rowHeight + noteLines.length * 10 + 18);
         doc.setFont('helvetica','bold');
         doc.setFontSize(10.5);
         doc.setTextColor(20,20,20);
@@ -1420,11 +1351,11 @@ function generatePDF(shouldDownload = true){
         doc.setDrawColor(210,210,210);
         doc.line(colX[3], y + rowHeight - 2, pageW-marginX, y + rowHeight - 2);
         y += rowHeight + 4;
-        if (r.note){
+        if (noteLines.length){
           doc.setFontSize(8);
           doc.setTextColor(150,110,60);
-          doc.text(r.note, colX[0], y, {maxWidth: pageW - marginX*2 - 10});
-          y += 12;
+          doc.text(noteLines, colX[0], y);
+          y += noteLines.length * 10 + 2;
         }
         doc.setDrawColor(230,230,230);
         doc.line(marginX, y + 2, pageW-marginX, y + 2);
@@ -1478,6 +1409,13 @@ function generatePDF(shouldDownload = true){
   }
 }
 
+// "Name — details" -> [name, details] so long plan text fills Exercise/Prescription
+// instead of overflowing one cell across the sheet.
+function splitPlanItem(item){
+  const i = item.indexOf(' — ');
+  return i === -1 ? [item, ''] : [item.slice(0, i), item.slice(i + 3)];
+}
+
 function generateExcel(){
   const status = document.getElementById('status');
   if (!window.XLSX){
@@ -1505,9 +1443,8 @@ function generateExcel(){
 
       const isRestDay = sess.rows.length === 0 && dailyWork.items.length === 0 && sess.conditioning.length === 0;
       if (isRestDay){
-        const restRow = weekRows.length;
+        // Not merged: a merge across B:G would hide the text in column C.
         weekRows.push(['', 'REST', 'No scheduled work', '', '', '', '']);
-        merges.push({ s: { r: restRow, c: 1 }, e: { r: restRow, c: 6 } });
       } else {
         const liftingRow = weekRows.length;
         weekRows.push(['', 'LIFTING', '', '', '', '', '']);
@@ -1523,14 +1460,14 @@ function generateExcel(){
         const dailyRow = weekRows.length;
         weekRows.push(['', 'DAILY WORK', '', '', '', '', '']);
         merges.push({ s: { r: dailyRow, c: 1 }, e: { r: dailyRow, c: 6 } });
-        dailyWork.items.forEach(item=>weekRows.push(['', 'Daily Work', item, '', '', '', 'Complete after lifting.']));
+        dailyWork.items.forEach(item=>weekRows.push(['', 'Daily Work', ...splitPlanItem(item), '', '', sess.rows.length ? 'Complete after lifting.' : '']));
       }
 
       if (sess.conditioning.length > 0){
         const cardioRow = weekRows.length;
         weekRows.push(['', 'CARDIO / CONDITIONING', '', '', '', '', '']);
         merges.push({ s: { r: cardioRow, c: 1 }, e: { r: cardioRow, c: 6 } });
-        sess.conditioning.filter(item => !item.startsWith('20-Minute Aerobic Solution')).forEach(item=>weekRows.push(['', 'Cardio', item, '', '', '', 'Complete after daily work.']));
+        sess.conditioning.filter(item => !item.startsWith('20-Minute Aerobic Solution')).forEach(item=>weekRows.push(['', 'Cardio', ...splitPlanItem(item), '', '', 'Complete after daily work.']));
         if (sess.conditioning.some(item => item.startsWith('20-Minute Aerobic Solution'))) weekRows.push(['', 'Cardio', '20-Minute Aerobic Solution', 'RPE ladder: 5-10', '', '', 'See PDF for minute-by-minute table.']);
       }
       weekRows.push(['', '', '', '', '', '', '']);
@@ -1545,7 +1482,14 @@ function generateExcel(){
     XLSX.utils.book_append_sheet(workbook, weekSheet, 'Week ' + week);
   }
 
-  const setupRows = [['Greyskull LP Program', weeks + '-week projection'], ['Daily Work', ...dailyWork.items], ['Conditioning', ...conditioning.plan]];
+  // One item per row; spreading items across a single row pushed them out into columns C, D, E...
+  const setupRows = [['Greyskull LP Program', weeks + '-week projection'], []];
+  const addSetupSection = (title, items, emptyText) => {
+    (items.length ? items : [emptyText]).forEach((item, i) => setupRows.push([i === 0 ? title : '', item]));
+    setupRows.push([]);
+  };
+  addSetupSection('Daily Work', dailyWork.items, 'None selected');
+  addSetupSection('Conditioning', conditioning.plan, 'None selected');
   const setupSheet = XLSX.utils.aoa_to_sheet(setupRows);
   setupSheet['!cols'] = [{wch:22},{wch:90}];
   XLSX.utils.book_append_sheet(workbook, setupSheet, 'Program Details');
